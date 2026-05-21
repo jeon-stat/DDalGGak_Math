@@ -1,6 +1,8 @@
 # views/home.py
 # 역할: 홈 화면 렌더링 및 피드백 폼 처리
 # CSS → styles.py / 사이드바 브랜딩 → components.py
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import time
 
