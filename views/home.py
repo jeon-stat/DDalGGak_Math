@@ -147,7 +147,7 @@ user_info_input = st.text_input(
 feedback_text = st.text_area(
     "의견이나 개선 요청사항을 자유롭게 입력해 주세요", 
     height=100, 
-    placeholder="엔진 개선을 위한 소중한 한 줄 피드백을 남겨주세요."
+    placeholder="ex) 홈페이지가 가독성이 떨어져요"
 )
 
 # 3초 알림 메시지 제어용 빈 슬롯
