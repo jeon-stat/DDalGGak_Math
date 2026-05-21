@@ -182,22 +182,21 @@ if menu_choice == "🏠 Home":
             st.warning("피드백 데이터베이스 관리를 위해 '강사 정보'를 먼저 입력해 주세요.")
         else:
             with st.spinner('구글 데이터베이스 시트에 안전하게 실시간 기록 중...'):
-                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 
-                # ⚠️ [중요] 연동을 원하시는 본인의 구글 폼 주소와 Entry ID로 채워주세요!
-                form_url = "https://docs.google.com/forms/d/e/⚠️본인의_구글폼_고유_ID⚠️/formResponse"
+                # 지민님의 실제 구글 폼 백엔드 수집 주소 적용 완료
+                form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfMMoBOa7hBNNpPcsMxePiXmAGfgI8eL20NK54p9rZv4usnvw/formResponse"
                 
+                # 추출한 entry ID 변수 매핑 완료
                 payload = {
-                    "entry.111111111": feedback_text,     # 구글 시트에 들어갈 '내용' entry ID
-                    "entry.222222222": current_time,      # 구글 시트에 들어갈 '날짜' entry ID
-                    "entry.333333333": user_info_input    # 구글 시트에 들어갈 '사용자 정보' entry ID
+                    "entry.1056156260": feedback_text,     # 의견 내용 매핑
+                    "entry.1147584167": user_info_input    # 강사 정보 매핑
                 }
                 
                 try:
-                    # 유저 화면 이동 없이 백엔드 연동 전송
+                    # 유저 화면 전환 없이 백엔드 전송 연동 실행
                     response = requests.post(form_url, data=payload)
                     if response.status_code == 200:
-                        st.success(f"🎉 감사합니다, {user_info_input} 선생님! 소중한 피드백이 연동된 구글 시트에 실시간으로 즉시 반영되었습니다.")
+                        st.success(f"🎉 감사합니다, {user_info_input} 선생님! 소중한 피드백이 연동된 구글 시트에 실시간으로 즉시 기록되었습니다.")
                     else:
                         st.error("시트 전송 중 일시적인 서버 지연이 발생했습니다. 잠시 후 다시 시도해 주세요.")
                 except Exception as e:
