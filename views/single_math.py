@@ -18,8 +18,8 @@ st.markdown("""
 [data-testid="stSidebar"] h2 { font-size: 1.2rem !important; }
 [data-testid="stSidebar"] .stHeader { font-size: 0.95rem !important; font-weight: 600 !important; }
 
-/* 💡 프리뷰 중앙 정렬 및 테두리 스킨 */
-iframe { display: block; margin: 0 auto !important; border: 1px solid rgba(128,128,128,0.2) !important; border-radius: 8px; }
+/* iframe 여백 제거 */
+iframe { display: block; margin: 0 auto !important; border: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -47,7 +47,6 @@ else:
         source_image = Image.open(uploaded_file)
         st.image(source_image, caption="원본 기출문제 프리뷰", width=280)
 
-# 세션 상태 강제 고정
 if 'qs' not in st.session_state: st.session_state.qs = []
 if 'es' not in st.session_state: st.session_state.es = []
 if 'res' not in st.session_state: st.session_state.res = None
@@ -62,12 +61,12 @@ if st.button("AI 변형 실행 (딸깍)", type="primary"):
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel('gemini-2.5-flash')
                 
-                # 💡 [프롬프트 개혁] 5지선다 선지 출력 및 컴팩트한 Step-by-Step 해설 가이드라인 주입
+                # 💡 [프롬프트 강력 통제] 수식 백틱(`) 금지 및 5지선다 의무화
                 p = "당신은 수능 수학 출제위원입니다. 다음 원본 문제를 변형하여 '5지선다형 객관식' 문항을 출제하십시오.\n" \
                     "문항 수: " + str(num_variants) + "\n" \
                     "유형: " + variant_type + "\n\n" \
                     "⚠️ [중요 준수 사항] ⚠️\n" \
-                    "1. 수식은 무조건 $...$로 감싸고 LaTeX 문법을 사용하십시오.\n" \
+                    "1. 수식은 무조건 $...$ 또는 $$...$$로 감싸고 LaTeX 문법을 사용하십시오. (절대로 백틱 ` 기호를 쓰지 마세요!)\n" \
                     "2. 문제의 발문과 조건, 그리고 ①~⑤ 선지 전체를 [QUESTION_START] 토큰 안에 모두 포함시키십시오.\n" \
                     "3. 정답과 단계별 풀이 과정을 [EXPLANATION_START] 토큰 안에 포함시키십시오.\n\n" \
                     "[출력 프로토콜 데이터 형식 예시]\n" \
@@ -91,7 +90,6 @@ if st.button("AI 변형 실행 (딸깍)", type="primary"):
                 response = model.generate_content(contents)
                 full_text = response.text
                 
-                # 정규표현식 파싱
                 qs = re.findall(r'\[QUESTION_START\](.*?)\[QUESTION_END\]', full_text, re.DOTALL)
                 es = re.findall(r'\[EXPLANATION_START\](.*?)\[EXPLANATION_END\]', full_text, re.DOTALL)
                 
@@ -102,33 +100,46 @@ if st.button("AI 변형 실행 (딸깍)", type="primary"):
             except Exception as e:
                 st.error("오류: " + str(e))
 
-# 2. 결과 렌더링
+# 2. 결과 렌더링 (실제 시험지 프리뷰)
 if st.session_state.res:
     st.divider()
     st.subheader("📄 수능 시험지 실물 프리뷰")
     
     html_body = ""
     for idx, q in enumerate(st.session_state.qs):
-        # 마크다운 찌꺼기 제거
-        clean_q = q.replace("**", "").replace("###", "")
-        html_body += "<div style='margin-bottom:25px; display: flex; align-items: flex-start;'>" \
-                     "<b style='font-size:16px; margin-right: 6px; user-select: none;'>" + str(idx+1) + ".</b> " \
-                     "<div style='width: 100%; word-break: break-all;'>" + clean_q + "</div>" \
+        # 백틱 강제 치환 및 마크다운 정리
+        clean_q = q.replace("`", "$").replace("**", "").replace("###", "")
+        html_body += "<div style='margin-bottom: 30px; display: flex; align-items: flex-start;'>" \
+                     "<b style='font-size: 16px; margin-right: 8px; user-select: none;'>" + str(idx+1) + ".</b> " \
+                     "<div style='width: 100%; word-break: break-all; white-space: pre-wrap;'>" + clean_q + "</div>" \
                      "</div>"
         
+    # 💡 [버그 종결] Javascript를 주입하여 내부 콘텐츠 길이를 계산해 iframe 높이를 '자동 조절' 합니다.
     iframe_src = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" \
                  "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>" \
                  "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>" \
                  "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>" \
-                 "<style>body { background-color:#fff; color:#000; margin:0; padding:20px; font-family:'serif'; line-height:1.6; font-size: 14.5px; }</style>" \
-                 "</head><body>" + html_body + \
-                 "<script>document.addEventListener('DOMContentLoaded', function(){renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});});</script>" \
-                 "</body></html>"
+                 "<link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>" \
+                 "<style>" \
+                 "body { margin: 0; padding: 10px; background-color: transparent; font-family: 'Noto Serif KR', 'Batang', serif; font-size: 14.5px; line-height: 1.7; }" \
+                 ".paper-box { background-color: #ffffff; color: #000000; padding: 35px 40px; max-width: 520px; margin: 0 auto; border: 1px solid #ccc; box-shadow: 0px 4px 12px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }" \
+                 "</style></head><body>" \
+                 "<div class='paper-box' id='paper'>" + html_body + "</div>" \
+                 "<script>" \
+                 "document.addEventListener('DOMContentLoaded', function(){" \
+                 "  renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}], throwOnError:false});" \
+                 "  setTimeout(function() {" \
+                 "      var paper = document.getElementById('paper');" \
+                 "      var newHeight = paper.offsetHeight + 30;" \
+                 "      window.parent.postMessage({type: 'streamlit:setFrameHeight', height: newHeight}, '*');" \
+                 "  }, 300);" \
+                 "});" \
+                 "</script></body></html>"
     
-    # 💡 세로가 150px로 잘리는 현상을 막기 위해 높이를 550으로 고정하고 스크롤 허용
-    components.html(iframe_src, width=320, height=550, scrolling=True)
+    # 높이를 지정하지 않음으로써 스크립트가 보내는 높이 데이터로 자동 리사이징 되게 함
+    components.html(iframe_src, width=None, scrolling=False)
     
-    # 3. 해설 출력 (컴팩트한 Step-by-Step 렌더링)
+    # 3. 해설 출력 (수식 코드 깨짐 완벽 방어)
     st.divider()
     st.subheader("💡 정답 및 해설")
     if not st.session_state.es:
@@ -136,12 +147,16 @@ if st.session_state.res:
     else:
         for idx, e in enumerate(st.session_state.es):
             with st.expander(f"▶ {idx+1}번 문항 해설 보기", expanded=True):
-                st.markdown(e)
+                # AI가 실수로 뱉어낸 백틱을 수학 기호 $로 강제 치환하여 초록색 박스 버그 차단
+                safe_e = e.replace("`", "$")
+                st.markdown(safe_e)
 
     # 4. 파일 편집용 Raw 데이터
     st.write("")
     with st.expander("📥 선생님 편집용 수식 텍스트 (HWP/Word 복사용)"):
         raw_text = ""
         for idx, q in enumerate(st.session_state.qs):
-            raw_text += f"[{idx+1}번]\n{q}\n\n"
+            # 파일 데이터에도 백틱 오류 치환 적용
+            clean_raw_q = q.replace("`", "$")
+            raw_text += f"[{idx+1}번]\n{clean_raw_q}\n\n"
         st.text_area("LaTeX 데이터", value=raw_text.strip(), height=150)
