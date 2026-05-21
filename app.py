@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 🎨 [트릭 및 디자인] 사이드바 맨 위 'app' 글자를 'Home'으로 강제 치환하는 마스터 CSS
+# 🎨 미니멀 럭셔리 라인 스타일 CSS (가변 메뉴 폰트 고정)
 st.markdown("""
     <style>
     .stApp {
@@ -15,20 +15,14 @@ st.markdown("""
         color: var(--text-color) !important;
     }
     
-    /* [핵심 트릭] 사이드바의 첫 번째 메뉴(app.py) 글자를 Home으로 보이지 않게 치환 */
-    section[data-testid="stSidebar"] re-element, 
-    section[data-testid="stSidebar"] li:first-child span {
-        font-size: 0 !important;
-    }
-    section[data-testid="stSidebar"] li:first-child span::after {
-        content: "🏠 Home" !important;
-        font-size: 1rem !important;
-        font-weight: 500 !important;
-    }
-    
     [data-testid="stSidebar"] {
         background-color: var(--background-color) !important;
         border-right: 2px solid rgba(128, 128, 128, 0.25) !important;
+    }
+    
+    /* 사이드바 메뉴 폰트 크기 및 간격 최적화 */
+    [data-testid="stSidebarNav"] {
+        padding-top: 20px !important;
     }
     
     .hero-section {
@@ -88,11 +82,16 @@ st.markdown("""
         margin-top: 40px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.02);
     }
-    
-    .stTabs [data-baseweb="tab-list"] { border-bottom: 2px solid rgba(128, 128, 128, 0.2) !important; }
     </style>
 """, unsafe_allow_html=True)
 
+# 🏠 메인 대문 표시 확인을 위한 사이드바 상단 브랜딩 (선택 사항)
+with st.sidebar:
+    st.markdown("<h2 style='font-size:1.2rem; font-weight:700; margin-bottom:10px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
+    st.write("현재 페이지: **🏠 Home**")
+    st.divider()
+
+# 대문 타이틀 섹션
 st.markdown("""
     <div class="hero-section">
         <div class="hero-title">DDalGGak Math Pro</div>
@@ -100,6 +99,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+# 테크놀로지 로드맵 안내
 st.markdown("<h3 style='font-size:1.4rem; font-weight:600; margin-bottom:20px; letter-spacing:-0.5px;'>📐 테크놀로지 로드맵</h3>", unsafe_allow_html=True)
 col1, col2, col3 = st.columns(3)
 
@@ -108,7 +108,7 @@ with col1:
         <div class="feature-card">
             <span style="font-size: 1.8rem;">⚙️</span>
             <h4>평가원 수학 무결성 검증 시스템</h4>
-            <p>단순 텍스트 치환 방식이 아닙니다. 교육과정 성취기준을 추론하여 중간 연산 과정และ 정답이 유리수 형태로 딱 떨어지도록 정교하게 역산 설계(Backward Design)합니다.</p>
+            <p>단순 텍스트 치환 방식이 아닙니다. 교육과정 성취기준을 추론하여 중간 연산 과정과 정답이 유리수 형태로 딱 떨어지도록 정교하게 역산 설계(Backward Design)합니다.</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -130,6 +130,7 @@ with col3:
         </div>
     """, unsafe_allow_html=True)
 
+# 오픈 베타 안내 카드
 st.markdown("""
     <div class="beta-notice-card">
         <h3 style="margin-top:0; font-weight:700; letter-spacing:-0.5px;">📢 강사 대상 프리미엄 오픈 베타 진행 중</h3>
@@ -138,11 +139,12 @@ st.markdown("""
             현재 대치동 및 학원가 현직 강사님들을 대상으로 출제 엔진 무결성 검증을 위한 <b>무료 베타 테스트</b>를 진행하고 있습니다.
         </p>
         <p style="font-weight: 600; margin-top: 20px; font-size: 1.05rem;">
-            👈 왼쪽 사이드바 메뉴에서 <b>[AI 단일 문항 변형]</b>을 선택해 출제위원 AI 엔진의 파워를 직접 경험해 보세요.
+            👈 왼쪽 사이드바 메뉴에서 <b>[1 AI 단일 문항 변형]</b>을 선택해 출제위원 AI 엔진의 파워를 직접 경험해 보세요.
         </p>
     </div>
 """, unsafe_allow_html=True)
 
+# 피드백 섹션
 st.write("")
 st.write("")
 st.markdown("### 💬 엔진 퀄리티 향상을 위한 의견 제시")
