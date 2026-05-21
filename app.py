@@ -7,27 +7,26 @@ st.set_page_config(
     layout="wide"
 )
 
-# 🎨 [하이브리드 테마] 라이트/다크모드에 완벽하게 동기화되는 프리미엄 CSS
+# 🎨 [라인 강화 버전] 테두리를 두껍고 선명하게 개선한 하이브리드 CSS
 st.markdown("""
     <style>
-    /* 1. 시스템 테마 변수를 그대로 이어받아 배경과 글씨색 자동 동기화 */
     .stApp {
         background-color: var(--background-color) !important;
         color: var(--text-color) !important;
     }
     
-    /* 2. 사이드바 영역도 시스템 테마에 맞춰 투명 가독성 확보 */
     [data-testid="stSidebar"] {
         background-color: var(--background-color) !important;
-        border-right: 1px solid rgba(128, 128, 128, 0.1) !important;
+        /* 사이드바 경계선을 2px 실선으로 두껍게 변경 */
+        border-right: 2px solid rgba(128, 128, 128, 0.25) !important;
     }
     
-    /* 3. 상단 메인 타이틀 세션 (테마 친화적 매트 라인 스타일) */
     .hero-section {
         text-align: left;
         padding: 40px 0px 24px 0px;
         background-color: transparent !important;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important;
+        /* 구분선을 2px로 두껍게 조절 */
+        border-bottom: 2px solid rgba(128, 128, 128, 0.25) !important;
         margin-bottom: 40px;
     }
     .hero-title {
@@ -41,26 +40,24 @@ st.markdown("""
         font-size: 1.1rem !important;
         color: var(--text-color) !important;
         opacity: 0.8;
-        font-weight: 400;
     }
     
-    /* 4. ★핵심★ 테마별 가변 그림자 카드로 개편 (라이트: 소프트 섀도우 / 다크: 은은한 발광 효과) */
+    /* ★요청 반영★ 기능 카드의 테두리를 2px로 늘리고 색상을 더 진하게 변경 */
     .feature-card {
         background-color: var(--background-color) !important;
         padding: 32px 24px;
         border-radius: 16px !important;
-        border: 1px solid rgba(128, 128, 128, 0.1) !important;
+        border: 2px solid rgba(128, 128, 128, 0.25) !important;
         text-align: left;
-        /* 다크모드에서도 텁텁하지 않도록 투명도 기반의 고급 입체 섀도우 처리 */
-        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.03), 
-                    0 1px 2px 0 rgba(0, 0, 0, 0.02);
+        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.02);
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         height: 100%;
     }
     .feature-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(128, 128, 128, 0.3) !important;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+        /* 마우스 호버 시 테두리선을 훨씬 더 진하고 선명하게 강조 */
+        border-color: rgba(128, 128, 128, 0.6) !important;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
     }
     .feature-card h4 {
         color: var(--text-color) !important;
@@ -76,11 +73,11 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    /* 5. 요금제 카드 슬림 테마 매핑 */
+    /* ★요청 반영★ 요금제 카드 테두리를 2px로 두껍게 마감 */
     .price-card {
         background-color: var(--background-color) !important;
-        border: 1px solid rgba(128, 128, 128, 0.15) !important;
-        border-top: 4px solid var(--text-color) !important; /* 모드별 반전 포인트 선 */
+        border: 2px solid rgba(128, 128, 128, 0.3) !important;
+        border-top: 5px solid var(--text-color) !important; /* 상단 메인 포인트 선을 5px로 강화 */
         padding: 35px;
         border-radius: 16px !important;
         text-align: center;
@@ -92,14 +89,13 @@ st.markdown("""
     .price-card ul { padding-left: 15px; margin-top: 20px; }
     .price-card li { color: var(--text-color) !important; opacity: 0.85; font-size: 0.9rem !important; text-align: left; margin-bottom: 10px; }
     
-    /* 탭 메뉴 텍스트 완전 동기화 */
-    .stTabs [data-baseweb="tab-list"] { border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important; }
+    /* 탭 메뉴 하단 분리선 두께 강화 */
+    .stTabs [data-baseweb="tab-list"] { border-bottom: 2px solid rgba(128, 128, 128, 0.2) !important; }
     .stTabs button { color: var(--text-color) !important; opacity: 0.6; }
     .stTabs button[aria-selected="true"] { opacity: 1 !important; font-weight: 600 !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 메인 배너
 st.markdown("""
     <div class="hero-section">
         <div class="hero-title">DDalGGak Math</div>
@@ -107,7 +103,6 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# 기능 카드
 st.markdown("<h3 style='font-size:1.3rem; font-weight:600; margin-bottom:20px;'>✨ 핵심 기능 안내</h3>", unsafe_allow_html=True)
 col1, col2, col3 = st.columns(3)
 
@@ -141,7 +136,6 @@ with col3:
 st.write("")
 st.divider()
 
-# 요금제
 st.markdown("<h3 style='font-size:1.3rem; font-weight:600; margin-bottom:20px;'>💳 요금제 플랜</h3>", unsafe_allow_html=True)
 p_col1, p_col2 = st.columns([1, 1.8])
 
@@ -151,7 +145,7 @@ with p_col1:
             <h3>강사 프리미엄</h3>
             <h2>월 39,000원</h2>
             <p>학원 교재 제작 및 기출 변형 무제한 생성</p>
-            <hr style='border:0; border-top:1px solid rgba(128,128,128,0.1); margin:15px 0;'>
+            <hr style='border:0; border-top:1px solid rgba(128,128,128,0.15); margin:15px 0;'>
             <ul>
                 <li>Gemini 2.5 기반 고밀도 추론 변형</li>
                 <li>수능형 실물 인쇄 전용 템플릿 제공</li>
