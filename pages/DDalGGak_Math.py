@@ -51,7 +51,7 @@ else:
         source_image = Image.open(uploaded_file)
         st.image(source_image, caption="업로드된 원본 기출문제", width=400)
 
-# 실행 및 렌더링 파트 (기존 캐싱 데이터 활용 구조)
+# 실행 및 렌더링 파트
 if 'raw_result' not in st.session_state: st.session_state.raw_result = None
 if 'questions' not in st.session_state: st.session_state.questions = []
 if 'explanations' not in st.session_state: st.session_state.explanations = []

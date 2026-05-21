@@ -1,5 +1,6 @@
 # templates.py
 
+# Gemini 출제를 제어하는 대한민국 수학 평가원 기준 출제 지침서
 SYSTEM_PROMPT = """
 너는 대한민국 평가원 수능 수학 출제위원이다. 입력된 문제를 분석하여 고품질 변형 문항을 생성하라.
 
@@ -28,6 +29,7 @@ SYSTEM_PROMPT = """
 - 상세 풀이: 풀이 과정을 자세히 적으시오.
 """
 
+# 초고화질 PDF 인쇄를 위한 웹 컴파일 템플릿 스타일
 def build_pdf_print_html(html_questions_content):
     return f"""
     <!DOCTYPE html>

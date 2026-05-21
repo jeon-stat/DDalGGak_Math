@@ -145,4 +145,4 @@ with p_col1:
 with p_col2:
     st.markdown("<h4 style='color:#0f172a; margin-top:0;'>🚀 지금 바로 시작하세요</h4>", unsafe_allow_html=True)
     st.write("초기 런칭 기념으로 현재 모든 강사님들께 무료 크레딧을 제공하고 있습니다. 왼쪽 메뉴에서 변형 엔진을 선택해 보세요.")
-    st.info("👈 왼쪽 사이드바 메뉴창에 생성된 [DDalGGak Math] 탭을 누르시면 AI 변형기 화면으로 즉시 연결됩니다.")
+    st.info("👈 왼쪽 사이드바 메뉴창에 생성된 **[DDalGGak Math]** 탭을 누르시면 AI 변형기 화면으로 즉시 연결됩니다.")
