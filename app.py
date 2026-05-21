@@ -2,6 +2,7 @@
 import streamlit as st
 from PIL import Image
 import requests
+import time
 from datetime import datetime
 from ai_engine import DDalGGakEngine
 from templates import build_pdf_print_html
@@ -159,11 +160,10 @@ if menu_choice == "🏠 Home":
 </div>
 """, unsafe_allow_html=True)
 
-    # 📝 [실시간 구글 시트 저장 핵심 파트] 
+    # 📝 [실시간 구글 시트 저장 및 3초 타이머 UI 렌더링 파트]
     st.write("")
     st.markdown("### 💬 엔진 퀄리티 향상을 위한 의견 제시")
     
-    # 1. 홈페이지 화면 내부 사용자 정보 입력란 배치
     user_info_input = st.text_input(
         "강사 정보 입력", 
         placeholder="예시: 대치동 수학과 홍길동 팀장 / OO학원 원장"
@@ -175,32 +175,38 @@ if menu_choice == "🏠 Home":
         placeholder="엔진 개선을 위한 소중한 한 줄 피드백을 남겨주세요."
     )
     
+    # 메시지를 동적으로 나타났다 사라지게 만들 빈 공간 홀더(Placeholder) 확보
+    msg_slot = st.empty()
+    
     if st.button("의견 전송하기", type="secondary"):
         if not feedback_text:
-            st.warning("내용을 입력하신 후 전송해 주세요.")
+            msg_slot.warning("내용을 입력하신 후 전송해 주세요.")
         elif not user_info_input:
-            st.warning("피드백 데이터베이스 관리를 위해 '강사 정보'를 먼저 입력해 주세요.")
+            msg_slot.warning("피드백 데이터베이스 관리를 위해 '강사 정보'를 먼저 입력해 주세요.")
         else:
             with st.spinner('구글 데이터베이스 시트에 안전하게 실시간 기록 중...'):
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 
-                # 지민님의 실제 구글 폼 백엔드 수집 주소 적용 완료
+                # 지민님의 최종 제출 폼 Response API 주소 매핑
                 form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfMMoBOa7hBNNpPcsMxePiXmAGfgI8eL20NK54p9rZv4usnvw/formResponse"
                 
-                # 추출한 entry ID 변수 매핑 완료
+                # 전달해주신 신규 entry ID 변수 매핑 완료
                 payload = {
-                    "entry.1056156260": feedback_text,     # 의견 내용 매핑
-                    "entry.1147584167": user_info_input    # 강사 정보 매핑
+                    "entry.1056156260": feedback_text,      # 의견 내용 
+                    "entry.1147584167": user_info_input     # 강사 정보
                 }
                 
                 try:
-                    # 유저 화면 전환 없이 백엔드 전송 연동 실행
                     response = requests.post(form_url, data=payload)
                     if response.status_code == 200:
-                        st.success(f"🎉 감사합니다, {user_info_input} 선생님! 소중한 피드백이 연동된 구글 시트에 실시간으로 즉시 기록되었습니다.")
+                        # 3초 동안만 알림 메시지를 렌더링하고 지워버리는 가변 UI 기믹
+                        msg_slot.success(f"🎉 감사합니다, {user_info_input} 선생님! 소중한 피드백이 연동된 구글 시트에 실시간 반영되었습니다.")
+                        time.sleep(3.0)  # 정각 3초 대기
+                        msg_slot.empty() # 홀더 공간을 투명하게 비워서 메시지 전면 파괴
                     else:
-                        st.error("시트 전송 중 일시적인 서버 지연이 발생했습니다. 잠시 후 다시 시도해 주세요.")
+                        msg_slot.error("시트 전송 중 일시적인 서버 지연이 발생했습니다. 잠시 후 다시 시도해 주세요.")
                 except Exception as e:
-                    st.error(f"구글 시트 연동 오류 발생: {e}")
+                    msg_slot.error(f"구글 시트 연동 오류 발생: {e}")
 
 # ==========================================
 # [메뉴 2] 📐 AI 단일 문항 변형 엔진 화면 분기
