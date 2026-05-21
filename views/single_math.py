@@ -86,61 +86,61 @@ if st.session_state.res:
         )
 
         iframe_src = f"""<!DOCTYPE html>
-<html>
-<head>
-<meta charset='UTF-8'>
-<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>
-<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>
-<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>
-<link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>
-<style>
-* {{ box-sizing: border-box; }}
-html, body {{
-    margin: 0;
-    padding: 0;
-    background-color: transparent;
-    font-family: 'Noto Serif KR', 'Batang', serif;
-    font-size: 14.5px;
-    line-height: 1.7;
-}}
-.paper-box {{
-    background-color: #ffffff;
-    color: #000000;
-    padding: 35px 40px;
-    max-width: 520px;
-    margin: 0 auto;
-    border: 1px solid #ccc;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-    border-radius: 4px;
-}}
-</style>
-</head>
-<body>
-<div class='paper-box' id='paper'>{html_body}</div>
-<script>
-function sendHeight() {{
-    var h = document.getElementById('paper').getBoundingClientRect().height;
-    window.parent.postMessage({{type: 'streamlit:setFrameHeight', height: Math.ceil(h) + 20}}, '*');
-}}
-
-document.addEventListener('DOMContentLoaded', function() {{
-    renderMathInElement(document.body, {{
-        delimiters: [
-            {{left: '$$', right: '$$', display: true}},
-            {{left: '$',  right: '$',  display: false}}
-        ],
-        throwOnError: false
-    }});
-
-    sendHeight();
-
-    new ResizeObserver(function() {{
+    <html>
+    <head>
+    <meta charset='UTF-8'>
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>
+    <script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>
+    <link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>
+    <style>
+    * {{ box-sizing: border-box; }}
+    html, body {{
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        font-family: 'Noto Serif KR', 'Batang', serif;
+        font-size: 14.5px;
+        line-height: 1.7;
+    }}
+    .paper-box {{
+        background-color: #ffffff;
+        color: #000000;
+        padding: 35px 40px;
+        max-width: 520px;
+        margin: 0 auto;
+        border: 1px solid #ccc;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }}
+    </style>
+    </head>
+    <body>
+    <div class='paper-box' id='paper'>{html_body}</div>
+    <script>
+    function sendHeight() {{
+        var h = document.getElementById('paper').getBoundingClientRect().height;
+        window.parent.postMessage({{type: 'streamlit:setFrameHeight', height: Math.ceil(h) + 20}}, '*');
+    }}
+    
+    document.addEventListener('DOMContentLoaded', function() {{
+        renderMathInElement(document.body, {{
+            delimiters: [
+                {{left: '$$', right: '$$', display: true}},
+                {{left: '$',  right: '$',  display: false}}
+            ],
+            throwOnError: false
+        }});
+    
         sendHeight();
-    }}).observe(document.getElementById('paper'));
-}});
-</script>
-</body>
-</html>"""
+    
+        new ResizeObserver(function() {{
+            sendHeight();
+        }}).observe(document.getElementById('paper'));
+    }});
+    </script>
+    </body>
+    </html>"""
 
     components.html(iframe_src, height=800, scrolling=False)
 
