@@ -9,9 +9,21 @@ import requests
 import streamlit as st
 
 from components import render_sidebar
-from styles import HOME_CSS
 
-st.markdown(HOME_CSS, unsafe_allow_html=True)
+st.markdown("""
+<style>
+.hero-section { text-align:left; padding:40px 0 24px; border-bottom:2px solid rgba(128,128,128,0.25); margin-bottom:40px; }
+.hero-title { font-size:2.6rem !important; font-weight:700 !important; letter-spacing:-1px; }
+.feature-card { background-color:var(--background-color) !important; padding:32px 24px; border-radius:16px !important; border:2px solid rgba(128,128,128,0.25) !important; height:100%; transition:all 0.25s ease; }
+.feature-card:hover { transform:translateY(-4px); border-color:rgba(128,128,128,0.6) !important; }
+.feature-card h4 { font-size:1.25rem !important; font-weight:600 !important; margin-top:14px; margin-bottom:8px; }
+.feature-card p { opacity:0.75; font-size:0.95rem !important; line-height:1.6; }
+.beta-notice-card { border:2px solid var(--text-color) !important; padding:35px; border-radius:16px !important; margin-top:40px; }
+.api-guide-box { background-color:rgba(59,130,246,0.06) !important; border-left:4px solid #3b82f6 !important; padding:20px; border-radius:8px; margin:20px 0; }
+.api-link { color:#3b82f6 !important; text-decoration:underline !important; font-weight:700 !important; }
+.stTextArea textarea, .stTextInput input { background-color:var(--background-color) !important; border:1.5px solid rgba(128,128,128,0.3) !important; color:var(--text-color) !important; border-radius:8px !important; }
+</style>
+""", unsafe_allow_html=True)
 
 # 사이드바
 render_sidebar("🏠 Home")
