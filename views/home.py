@@ -79,7 +79,7 @@ with st.sidebar:
 # 메인 히어로 섹션
 st.markdown("""
 <div class="hero-section">
-    <div class="hero-title">DDalGGak Math Pro</div>
+    <div class="hero-title">DDalGGak Math</div>
     <p style="font-size:1.15rem; opacity:0.8; margin-top:10px;">대한민국 최초 출제위원 기조의 수학 문항 역산 설계 및 실물 시험지 변형 엔진</p>
 </div>
 """, unsafe_allow_html=True)
