@@ -15,14 +15,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# views/single_math.py (상단 사이드바 렌더링 파트 교체)
+
 with st.sidebar:
     st.markdown("<h2 style='font-size:1.4rem; font-weight:700; margin-bottom:5px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
     st.write("현재 위치: **📐 단일 문항 변형**")
+    st.divider() 
     st.header("⚙️ 출제 세부 옵션")
     api_key = st.text_input("Gemini API Key를 입력하세요", type="password")
     num_variants = st.slider("생성할 변형 문항 수", min_value=1, max_value=5, value=1)
     variant_type = st.radio("변형 메커니즘 선택", options=["유형 1: 숫자 및 단순 조건 변형 (동일 구조)", "유형 2: 표현 및 형태 변형 (발문 비틀기)", "유형 3: 사고과정 공유 변형 (완전 위장 / 킬러)"])
+
 
 st.title("📐 AI 단일 문항 변형 엔진")
 st.markdown("수능 및 내신 기출문제를 완벽하게 분석하여 무결성 변형 문제를 생성합니다.")
