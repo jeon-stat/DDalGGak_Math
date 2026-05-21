@@ -1,16 +1,18 @@
 # app.py
 import streamlit as st
 from PIL import Image
+import requests
+from datetime import datetime
 from ai_engine import DDalGGakEngine
 from templates import build_pdf_print_html
 
 st.set_page_config(
-    page_title="DDalGGak Math - 프리미엄 AI 수학 문제 변형 플랫폼",
+    page_title="DDalGGak Math Pro - 프리미엄 AI 수학 문제 변형 플랫폼",
     page_icon="📐",
     layout="wide"
 )
 
-# 🎨 [디자인 고도화] 라이트/다크모드 완벽 대응 및 2px 미니멀 라인 CSS
+# 🎨 [디자인 고도화] 라이트/다크모드 완벽 대응 및 미니멀 스킨 CSS
 st.markdown("""
 <style>
 .stApp {
@@ -87,7 +89,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 메뉴 바
+# 🗺️ 플랫폼 사이드바 메뉴 구성
 with st.sidebar:
     st.markdown("<h2 style='font-size:1.4rem; font-weight:700; margin-bottom:5px; letter-spacing:-0.5px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
@@ -98,11 +100,13 @@ with st.sidebar:
     )
     st.write("---")
 
-# Home 분기
+# ==========================================
+# [메뉴 1] 🏠 Home 화면 분기
+# ==========================================
 if menu_choice == "🏠 Home":
     st.markdown("""
 <div class="hero-section">
-    <div class="hero-title">DDalGGak Math</div>
+    <div class="hero-title">DDalGGak Math Pro</div>
     <p style="font-size:1.15rem; opacity:0.8; margin-top:10px;">대한민국 최초 출제위원 기조의 수학 문항 역산 설계 및 실물 시험지 변형 엔진</p>
 </div>
 """, unsafe_allow_html=True)
@@ -137,7 +141,6 @@ if menu_choice == "🏠 Home":
 </div>
 """, unsafe_allow_html=True)
 
-    # 문자열 내부의 모든 앞 공백(들여쓰기)을 완전히 제거하여 코드 블록 오작동 원천 차단
     st.markdown("""
 <div class="beta-notice-card">
     <h3 style="margin-top:0; font-weight:700;">📢 강사 대상 프리미엄 오픈 베타 진행 중</h3>
@@ -156,14 +159,53 @@ if menu_choice == "🏠 Home":
 </div>
 """, unsafe_allow_html=True)
 
+    # 📝 [실시간 구글 시트 저장 핵심 파트] 
     st.write("")
     st.markdown("### 💬 엔진 퀄리티 향상을 위한 의견 제시")
-    feedback_text = st.text_area("의견이나 개선 요청사항을 자유롭게 입력해 주세요 (예: 킬러 문항 변형 시 조건 누락 발생 등)", height=100)
+    
+    # 1. 홈페이지 화면 내부 사용자 정보 입력란 배치
+    user_info_input = st.text_input(
+        "강사 정보 입력", 
+        placeholder="예시: 대치동 수학과 홍길동 팀장 / OO학원 원장"
+    )
+    
+    feedback_text = st.text_area(
+        "의견이나 개선 요청사항을 자유롭게 입력해 주세요 (예: 킬러 문항 변형 시 조건 누락 발생 등)", 
+        height=100,
+        placeholder="엔진 개선을 위한 소중한 한 줄 피드백을 남겨주세요."
+    )
+    
     if st.button("의견 전송하기", type="secondary"):
-        if feedback_text: st.success("🙏 소중한 전문 의견이 출제위원회에 전달되었습니다. 감사합니다!")
-        else: st.warning("내용을 입력하신 후 전송해 주세요.")
+        if not feedback_text:
+            st.warning("내용을 입력하신 후 전송해 주세요.")
+        elif not user_info_input:
+            st.warning("피드백 데이터베이스 관리를 위해 '강사 정보'를 먼저 입력해 주세요.")
+        else:
+            with st.spinner('구글 데이터베이스 시트에 안전하게 실시간 기록 중...'):
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # ⚠️ [중요] 연동을 원하시는 본인의 구글 폼 주소와 Entry ID로 채워주세요!
+                form_url = "https://docs.google.com/forms/d/e/⚠️본인의_구글폼_고유_ID⚠️/formResponse"
+                
+                payload = {
+                    "entry.111111111": feedback_text,     # 구글 시트에 들어갈 '내용' entry ID
+                    "entry.222222222": current_time,      # 구글 시트에 들어갈 '날짜' entry ID
+                    "entry.333333333": user_info_input    # 구글 시트에 들어갈 '사용자 정보' entry ID
+                }
+                
+                try:
+                    # 유저 화면 이동 없이 백엔드 연동 전송
+                    response = requests.post(form_url, data=payload)
+                    if response.status_code == 200:
+                        st.success(f"🎉 감사합니다, {user_info_input} 선생님! 소중한 피드백이 연동된 구글 시트에 실시간으로 즉시 반영되었습니다.")
+                    else:
+                        st.error("시트 전송 중 일시적인 서버 지연이 발생했습니다. 잠시 후 다시 시도해 주세요.")
+                except Exception as e:
+                    st.error(f"구글 시트 연동 오류 발생: {e}")
 
-# 변형기 엔진 구동 분기
+# ==========================================
+# [메뉴 2] 📐 AI 단일 문항 변형 엔진 화면 분기
+# ==========================================
 elif menu_choice == "📐 AI 단일 문항 변형":
     st.title("📐 AI 단일 문항 변형 엔진")
     st.markdown("수능 및 내신 기출문제를 완벽하게 분석하여 무결성 변형 문제를 생성합니다.")
@@ -234,32 +276,23 @@ elif menu_choice == "📐 AI 단일 문항 변형":
         perfect_html = build_pdf_print_html(html_content)
         st.download_button(label="📥 초고화질 수능 양식 인쇄용 파일 다운로드 (딸깍)", data=perfect_html, file_name="ddalggak_math_print.html", mime="text/html")
 
+# ==========================================
+# [메뉴 3, 4] ⚡ 티저 및 대기 화면 분기
+# ==========================================
 elif menu_choice == "⚡ 모의고사 통째로 변형 (준비중)":
-    st.title("⚡ 모의고사 통째로 변형 (Full-Exam Converter)")
-    st.markdown("시험지 PDF 한 장만 올리면 내신/수능 모의고사 30문항 전체를 원클릭 변형하는 핵심 코어 기능입니다.")
+    st.title("⚡ 모의고사 통째로 변형")
     st.markdown("""
 <div style="border: 2px dashed rgba(128, 128, 128, 0.4); padding: 40px; border-radius: 16px; text-align: center; margin-top: 50px;">
     <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 15px;">🛠️ 현재 AI 엔진 심화 학습 및 파이프라인 구축 중</h2>
-    <p style="opacity: 0.8; font-size: 1rem; line-height: 1.6;">
-        단일 문항 인식을 넘어 문항별 좌표 자동 분할(Object Detection) 및 단원 매핑 모델을 고도화하고 있습니다.
-    </p>
-    <p style="font-weight: 600; color: #3b82f6; margin-top: 20px; font-size: 1.05rem;">
-        🚀 Coming Soon — [AI 단일 문항 변형] 기능을 메뉴에서 먼저 체험해 보세요!
-    </p>
+    <p style="opacity: 0.8; font-size: 1rem; line-height: 1.6;">단일 문항 인식을 넘어 문항별 좌표 자동 분할 및 단원 매핑 모델을 고도화하고 있습니다.</p>
 </div>
 """, unsafe_allow_html=True)
 
 elif menu_choice == "🗂️ 나만의 오답 보관함 (준비중)":
     st.title("🗂️ 클라우드 문항 및 오답 보관함")
-    st.markdown("학원 학생별 오답 노트 관리 및 나만의 시크릿 교재 단원별 데이터베이스 아카이빙 시스템입니다.")
     st.markdown("""
 <div style="border: 2px dashed rgba(128, 128, 128, 0.4); padding: 40px; border-radius: 16px; text-align: center; margin-top: 50px;">
     <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 15px;">🔐 회원가입 및 데이터베이스 보안 연동 예정</h2>
-    <p style="opacity: 0.8; font-size: 1rem; line-height: 1.6;">
-        내가 생성한 프리미엄 변형 문항들을 영구적으로 저장하고, 학생별 커스텀 시험지로 재조합할 수 있는 강사 전용 클라우드 스토리지를 준비 중입니다.
-    </p>
-    <p style="font-weight: 600; color: #10b981; margin-top: 20px; font-size: 1.05rem;">
-        📈 정식 버전 출시와 함께 가동됩니다. 많은 기대 부탁드립니다!
-    </p>
+    <p style="opacity: 0.8; font-size: 1rem; line-height: 1.6;">내가 생성한 프리미엄 변형 문항들을 영구적으로 저장하는 강사 전용 클라우드 스토리지를 준비 중입니다.</p>
 </div>
 """, unsafe_allow_html=True)
