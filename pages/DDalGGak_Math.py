@@ -4,42 +4,61 @@ from PIL import Image
 from ai_engine import DDalGGakEngine
 from templates import build_pdf_print_html
 
-# 메뉴 이름 및 페이지 이름 지정
 st.set_page_config(page_title="DDalGGak Math 출제 엔진", page_icon="📐", layout="wide")
 
-# 다크모드 충돌 방지 및 화이트 톤 유지 스타일
+# 🎨 [디자인 전면 개편] 메인 홈과 일관된 Pure 화이트 + 소프트 그림자 테마 적용
 st.markdown("""
     <style>
-    .stApp { background-color: #f8fafc !important; color: #0f172a !important; }
-    [data-testid="stSidebar"] { background-color: #ffffff !important; border-right: 1px solid #e2e8f0; }
-    [data-testid="stSidebar"] * { color: #334155 !important; }
+    /* 페이지 배경 화이트 완전 고정 */
+    .stApp {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-right: 1px solid #f1f5f9 !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #334155 !important;
+    }
     
-    /* 수능 시험지 용지 스타일 */
+    /* 입력 컴포넌트 박스들 가독성 스킨 케어 */
+    .stTextArea textarea, .stTextInput input {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        border-radius: 8px !important;
+    }
+    
+    /* 📄 수능 시험지 렌더링 박스 (종이 질감 인쇄용 프리뷰) */
     .ddalggak-paper-sheet {
         background-color: #ffffff !important;
         padding: 40px 50px;
-        border: 1px solid #111111 !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        border: 1px solid #1e293b !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
         font-family: 'Noto Serif KR', 'Batang', serif !important;
-        margin: 20px auto; max-width: 900px;
+        margin: 20px auto;
+        max-width: 850px;
+        border-radius: 4px;
     }
     .ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
-    .ddalggak-paper-sheet blockquote { border: 1px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
+    .ddalggak-paper-sheet blockquote { border: 1px solid #000000 !important; padding: 18px !important; margin: 15px 0 !important; }
     .ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
-    .question-title { font-weight: bold; font-size: 1.1rem; color: #000000 !important; margin-bottom: 10px; }
+    .question-title { font-weight: bold; font-size: 1.05rem; color: #000000 !important; margin-bottom: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
 st.title("📐 DDalGGak Math 출제 엔진")
 st.markdown("수능 및 내신 기출문제를 완벽하게 분석하여 무결성 변형 문제를 생성합니다.")
 
-# 사이드바 컨트롤러 (라이트모드 대응 완료)
+# 사이드바 제어 패널
 with st.sidebar:
     st.header("⚙️ 딸깍 출제 옵션")
     api_key = st.text_input("Gemini API Key를 입력하세요", type="password")
     num_variants = st.slider("생성할 변형 문항 수", min_value=1, max_value=5, value=1)
     variant_type = st.radio("변형 메커니즘 선택", options=["유형 1: 숫자 및 단순 조건 변형 (동일 구조)", "유형 2: 표현 및 형태 변형 (발문 비틀기)", "유형 3: 사고과정 공유 변형 (완전 위장 / 킬러)"])
 
+# 입력 UI
 input_method = st.radio("원본 문제 입력 방식", ["📷 이미지/PDF 업로드", "✍️ 텍스트 직접 입력"])
 source_text, source_image = "", None
 
@@ -51,7 +70,7 @@ else:
         source_image = Image.open(uploaded_file)
         st.image(source_image, caption="업로드된 원본 기출문제", width=400)
 
-# 실행 및 렌더링 파트
+# 세션 상태 세팅
 if 'raw_result' not in st.session_state: st.session_state.raw_result = None
 if 'questions' not in st.session_state: st.session_state.questions = []
 if 'explanations' not in st.session_state: st.session_state.explanations = []
@@ -72,6 +91,7 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
             except Exception as e:
                 st.error(f"❌ 에러 발생: {e}")
 
+# 결과 출력 뷰어
 if st.session_state.raw_result:
     st.divider()
     tab1, tab2 = st.tabs(["📄 수능 시험지 실물 프리뷰", "👁️ AI Raw 데이터"])
