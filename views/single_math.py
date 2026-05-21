@@ -1,6 +1,8 @@
 # views/single_math.py
 # 역할: 단일 문항 변형 UI 및 결과 렌더링
 # AI 호출 → ai_engine.py / 프롬프트 → prompts.py / 사이드바 → components.py
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import re
 
