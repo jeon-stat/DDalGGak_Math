@@ -85,7 +85,7 @@ if st.session_state.res:
             f"</div>"
         )
 
-    iframe_src = f"""<!DOCTYPE html>
+        iframe_src = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset='UTF-8'>
@@ -94,9 +94,10 @@ if st.session_state.res:
 <script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>
 <link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>
 <style>
-body {{
+* {{ box-sizing: border-box; }}
+html, body {{
     margin: 0;
-    padding: 10px;
+    padding: 0;
     background-color: transparent;
     font-family: 'Noto Serif KR', 'Batang', serif;
     font-size: 14.5px;
@@ -111,7 +112,6 @@ body {{
     border: 1px solid #ccc;
     box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
     border-radius: 4px;
-    overflow: hidden;
 }}
 </style>
 </head>
@@ -119,9 +119,8 @@ body {{
 <div class='paper-box' id='paper'>{html_body}</div>
 <script>
 function sendHeight() {{
-    var paper = document.getElementById('paper');
-    var h = paper.getBoundingClientRect().height;
-    window.parent.postMessage({{type: 'streamlit:setFrameHeight', height: h + 40}}, '*');
+    var h = document.getElementById('paper').getBoundingClientRect().height;
+    window.parent.postMessage({{type: 'streamlit:setFrameHeight', height: Math.ceil(h) + 20}}, '*');
 }}
 
 document.addEventListener('DOMContentLoaded', function() {{
@@ -132,21 +131,18 @@ document.addEventListener('DOMContentLoaded', function() {{
         ],
         throwOnError: false
     }});
+
     sendHeight();
-    var last = 0;
-    setInterval(function() {{
-        var h = document.getElementById('paper').getBoundingClientRect().height + 40;
-        if (Math.abs(h - last) > 2) {{
-            last = h;
-            window.parent.postMessage({{type: 'streamlit:setFrameHeight', height: h}}, '*');
-        }}
-    }}, 100);
+
+    new ResizeObserver(function() {{
+        sendHeight();
+    }}).observe(document.getElementById('paper'));
 }});
 </script>
 </body>
 </html>"""
 
-    components.html(iframe_src, height=2000, scrolling=False)
+    components.html(iframe_src, height=800, scrolling=False)
 
     # ── 3. 해설 출력 ──────────────────────────────────────
     st.divider()
