@@ -104,14 +104,26 @@ if st.session_state.res:
         "renderMathInElement(document.body,{delimiters:["
         "{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],"
         "throwOnError:false});"
-        "setTimeout(function(){"
+        "function sendHeight(){"
         "var paper=document.getElementById('paper');"
-        "var newHeight=paper.offsetHeight+30;"
-        "window.parent.postMessage({type:'streamlit:setFrameHeight',height:newHeight},'*');"
-        "},300);});"
+        "var h=paper.getBoundingClientRect().height;"
+        "window.parent.postMessage({type:'streamlit:setFrameHeight',height:h+40},'*');"
+        "}"
+        "renderMathInElement(document.body,{"
+        "delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],"
+        "throwOnError:false,"
+        "afterTypeset:function(){sendHeight();}"  # ← 수식 렌더링 완료 직후 높이 전송
+        "});"
+        "sendHeight();"  # 혹시 수식 없을 때를 위한 즉시 실행
+        "var last=0;"
+        "setInterval(function(){"  # 0.1초마다 높이 변화 감지
+        "var h=document.getElementById('paper').getBoundingClientRect().height+40;"
+        "if(Math.abs(h-last)>2){last=h;"
+        "window.parent.postMessage({type:'streamlit:setFrameHeight',height:h},'*');}"
+        "},100);"
         "</script></body></html>"
     )
-    components.html(iframe_src, width=None, scrolling=False)
+    components.html(iframe_src, height=2000, scrolling=False))
 
     # ── 3. 해설 출력 ──────────────────────────────────────
     st.divider()
