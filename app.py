@@ -5,7 +5,7 @@ from ai_engine import DDalGGakEngine
 from templates import build_pdf_print_html
 
 st.set_page_config(
-    page_title="DDalGGak Math Pro - 프리미엄 AI 수학 문제 변형 플랫폼",
+    page_title="DDalGGak Math - 프리미엄 AI 수학 문제 변형 플랫폼",
     page_icon="📐",
     layout="wide"
 )
