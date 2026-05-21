@@ -1,57 +1,35 @@
 # views/single_math.py
 import streamlit as st
 from PIL import Image
-from ai_engine import DDalGGakEngine
-from templates import build_pdf_print_html
+import google.generativeai as genai
+import json
+import re
 
-# 🎨 [디자인 대개혁] 외부 CSS 충돌을 원천 차단하는 독립형 프리미엄 수능 시험지 스킨
+# 🎨 라이트/다크모드 완벽 대응 및 미니멀 스킨 CSS
 st.markdown("""
 <style>
-/* 기본 인풋 컴포넌트 스타일링 */
 .stTextArea textarea, .stTextInput input, .stSelectbox div { 
     background-color: var(--background-color) !important; 
     border: 1.5px solid rgba(128, 128, 128, 0.3) !important; 
     color: var(--text-color) !important; 
     border-radius: 8px !important; 
 }
-
-/* 📄 [핵심 보정] 흰색 박스 버그를 전면 박멸하고 실제 수능 시험지 느낌을 구현한 프레임 */
-.premium-paper-container {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    padding: 40px 50px;
-    border: 2px solid #000000 !important;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-    font-family: 'Noto Serif KR', 'Batang', serif !important;
-    margin: 20px auto;
-    max-width: 800px;
-    border-radius: 2px;
-    line-height: 1.7;
+.ddalggak-paper-sheet { 
+    background-color: #ffffff !important; 
+    padding: 45px 55px; 
+    border: 2px solid #000000 !important; 
+    box-shadow: 0 20px 50px -12px rgba(0,0,0,0.15); 
+    font-family: 'Noto Serif KR', 'Batang', serif !important; 
+    margin: 30px auto; 
+    max-width: 860px; 
+    border-radius: 4px; 
 }
+.ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
+.ddalggak-paper-sheet blockquote { border: 2px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
+.ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
+.question-title { font-weight: bold; font-size: 1.05rem; color: #000000 !important; margin-bottom: 12px; }
 
-/* 시험지 내부의 모든 텍스트와 수식을 강제로 검은색 수능 시험지 서식으로 통일 */
-.premium-paper-container * {
-    color: #000000 !important;
-    background-color: transparent !important;
-}
-
-.premium-paper-container p, .premium-paper-container div {
-    color: #000000 !important;
-    font-size: 1.05rem !important;
-    letter-spacing: -0.5px;
-}
-
-.premium-variant-title {
-    font-weight: 800 !important;
-    font-size: 1.1rem !important;
-    color: #000000 !important;
-    margin-bottom: 14px;
-    border-bottom: 1px solid #000000;
-    padding-bottom: 4px;
-    display: inline-block;
-}
-
-/* 📐 왼쪽 사이드바 옵션 글씨 크기 오밀조밀하게 축소 */
+/* 📐 왼쪽 사이드바 옵션 글씨 크기 정밀 축소 스킨 */
 [data-testid="stSidebar"] { font-size: 0.88rem !important; }
 [data-testid="stSidebar"] h2 { font-size: 1.3rem !important; }
 [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] .stHeader {
@@ -63,7 +41,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 🗺️ 사이드바 컨트롤러 파트
+# 🗺️ 사이드바 옵션 및 컨트롤러 메뉴
 with st.sidebar:
     st.markdown("<h2 style='font-size:1.4rem; font-weight:700; margin-bottom:5px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
@@ -81,37 +59,95 @@ st.markdown("수능 및 내신 기출문제를 완벽하게 분석하여 무결�
 st.write("")
 
 input_method = st.radio("원본 문제 입력 방식", ["📷 이미지/PDF 업로드", "✍️ 텍스트 직접 입력"])
+source_text, source_image = "", None
 
-# 세션 무결성 로직 고정
-if 'raw_result' not in st.session_state: st.session_state.raw_result = None
-if 'questions' not in st.session_state: st.session_state.questions = []
-if 'explanations' not in st.session_state: st.session_state.explanations = []
-if 'saved_image' not in st.session_state: st.session_state.saved_image = None
-
-source_text = ""
 if input_method == "✍️ 텍스트 직접 입력":
     source_text = st.text_area("원본 문제를 입력하세요", height=150)
-    st.session_state.saved_image = None
 else:
     uploaded_file = st.file_uploader("문제 이미지 파일 업로드", type=["png", "jpg", "jpeg"])
     if uploaded_file is not None:
-        st.session_state.saved_image = Image.open(uploaded_file)
+        source_image = Image.open(uploaded_file)
+        st.image(source_image, caption="업로드된 원본 기출문제", width=280)
 
-# 업로드한 원본 파일 컴팩트 프리뷰 (바깥에 배치)
-if st.session_state.saved_image is not None:
-    st.image(st.session_state.saved_image, caption="📷 내가 업로드한 원본 기출문제", width=300)
+# 세션 상태 메모리 방어선 초기화
+if 'raw_result' not in st.session_state: st.session_state.raw_result = None
+if 'questions' not in st.session_state: st.session_state.questions = []
+if 'explanations' not in st.session_state: st.session_state.explanations = []
 
-# 변형 실행 버튼 딸깍
+# 변형 실행 메인 스케줄러
 if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
     if not api_key:
         st.error("🔑 사이드바에 API Key를 입력하세요!")
     else:
         with st.spinner('AI 출제위원이 고품질 문항을 설계 중입니다...'):
             try:
-                engine = DDalGGakEngine(api_key=api_key)
-                raw_result = engine.generate_variants(source_text, st.session_state.saved_image, variant_type, num_variants)
-                questions, explanations = engine.parse_result(raw_result)
+                # 내부에서 Gemini API 실시간 연동 가동
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel('gemini-2.5-pro')
                 
+                # 💡 [지민님이 요청하신 원본 프롬프트 전체 본문 탑재 완료]
+                prompt = f"""
+당신은 대한민국 한국교육과정평가원 수학 출제위원 기조의 최고 전문가 AI입니다.
+입력된 수학 문제를 분석하여, 지정된 '변형 메커니즘' 옵션 조건에 맞는 최상위 무결성 변형 문항을 출제하십시오.
+
+[출제 요구 사양]
+- 생성 문항 수: {num_variants}개
+- 선택된 변형 메커니즘: {variant_type}
+
+★ 메커니즘별 변형 가이드라인 ★
+1. "유형 1: 숫자 및 단순 조건 변형 (동일 구조)" 선택 시:
+   - 문제의 상황, 발문 구조, 대수적/기하학적 핵심 성질은 원본과 완벽히 일치해야 합니다.
+   - 오직 상수, 함수식의 계수 등 숫자 데이터만 치환하십시오.
+   - 단, 치환된 숫자로 인해 정답이 분수나 무리수로 깨지지 않고, 깔끔한 '정수 또는 유리수'로 떨어지도록 역산 설계하십시오.
+
+2. "유형 2: 표현 및 형태 변형 (발문 비틀기)" 선택 시:
+   - 원본 문항과 수학적 본질(동일 단원, 동일 행동영역)은 공유해야 합니다.
+   - 다만 발문 스타일을 완전히 새롭게 비틀어 표현하십시오. (예: 최댓값 구하기를 '합성함수가 불연속이 되는 점의 개수' 또는 박스형 보기 조건으로 위장)
+
+3. "유형 3: 사고과정 공유 변형 (완전 위장 / 킬러)" 선택 시:
+   - 원본의 구체적인 수식이나 대수 구조를 절대로 그대로 복사해 쓰지 마십시오.
+   - 원본 킬러 문항이 내포한 고난도 사고과정(예: 대칭성을 이용한 추론, 케이스 분류 메커니즘 등)만 핵심 논리로 상속받으십시오.
+   - 완전히 초면인 새로운 지수/로그/삼각함수 합성식을 설계하여 외관상 100% 다른 신작 문항처럼 위장하십시오.
+
+[입력 데이터]
+텍스트: {source_text}
+
+----------------------------------------------------------------------
+[출력 데이터 프로토콜 포맷]
+반드시 프론트엔드 파서 규칙을 준수하여 다른 인사말 없이 아래 태그 구조로만 일반 텍스트 답변을 출력하십시오.
+
+[QUESTION_START]
+(여기에 변형된 문항 발문을 작성하십시오. 수식은 무조건 LaTeX 기호인 $...$ 또는 $$...$$로 감싸야 합니다.)
+[QUESTION_END]
+[EXPLANATION_START]
+(여기에 정답 및 단계별 해설을 작성하십시오. 수식은 LaTeX 필수.)
+[EXPLANATION_END]
+
+문항 수 조건이 {num_variants}개이므로, 위 세트를 총 {num_variants}번 반복하여 렌더링하십시오.
+"""
+                # 멀티모달 주입 스케줄러
+                contents = []
+                if source_image is not None:
+                    contents.append(source_image)
+                contents.append(prompt)
+                
+                response = model.generate_content(contents)
+                raw_result = response.text
+                
+                # 텍스트 파싱 처리
+                q_pattern = re.compile(r'\[QUESTION_START\](.*?)\[QUESTION_END\]', re.DOTALL)
+                e_pattern = re.compile(r'\[EXPLANATION_START\](.*?)\[EXPLANATION_END\]', re.DOTALL)
+                
+                raw_questions = q_pattern.findall(raw_result)
+                raw_explanations = e_pattern.findall(raw_result)
+                
+                questions = [q.strip() for q in raw_questions]
+                explanations = [e.strip() for e in raw_explanations]
+                
+                if not questions:
+                    questions.append(raw_result)
+                    explanations.append("해설 분리 실패 - Raw 데이터 참조")
+                    
                 st.session_state.raw_result = raw_result
                 st.session_state.questions = questions
                 st.session_state.explanations = explanations
@@ -119,39 +155,26 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
             except Exception as e:
                 st.error(f"❌ 에러 발생: {e}")
 
-# 📄 [완벽 보정 실행] 변형 문항 노출 메커니즘
+# 📄 최종 결과 렌더링 파트
 if st.session_state.raw_result:
     st.divider()
     
+    # 수능 시험지 실물 프리뷰 박스 (외부 함수 충돌 우려가 없는 순수 내장 구조)
     st.subheader("📄 수능 시험지 실물 프리뷰")
-    
-    # 💡 흰색 박스를 유발하던 과거의 div 클래스명을 버리고, 강제로 완전 독립된 프리미엄 스타일로 렌더링
+    st.markdown('<div class="ddalggak-paper-sheet">', unsafe_allow_html=True)
     for idx, q_content in enumerate(st.session_state.questions):
-        st.markdown(f"""
-        <div class="premium-paper-container">
-            <div class="premium-variant-title">【변형 문항 {idx+1}번】</div>
-            <div style="color: #000000 !important;">{q_content.strip()}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    # 정답 및 출제위원 해설 영역
-    st.write("")
+        st.markdown(f'<div class="question-title">【변형 문항 {idx+1}번】</div>', unsafe_allow_html=True)
+        st.markdown(q_content.strip(), unsafe_allow_html=True)
+        st.write("---")
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 정답 및 해설 섹션
     st.subheader("💡 정답 및 출제위원 해설")
     for idx, e_content in enumerate(st.session_state.explanations):
         with st.expander(f"▶ 【변형 문항 {idx+1}번】 정답 및 풀이 확인"):
             st.markdown(e_content.strip())
             
-    # 개발 및 디버깅 검증용 보관함
+    # AI Raw 데이터 박스
     st.write("")
     with st.expander("👁️ AI Raw 데이터 확인 (개발 및 검증용)"):
         st.text_area("AI 원본 텍스트", st.session_state.raw_result, height=200)
-        
-    # 초고화질 다운로드 엔진 가동
-    st.divider()
-    html_content = ""
-    for idx, q_content in enumerate(st.session_state.questions):
-        formatted_q = q_content.strip().replace(">", "<div style='border:2px solid #000; padding:18px; margin:12px 0; font-size:14px;'>").replace("\n", "<br>")
-        html_content += f'<div style="margin-bottom: 40px; page-break-inside: avoid;"><b style="font-size: 18px;">{idx+1}.</b> {formatted_q}</div>'
-        
-    perfect_html = build_pdf_print_html(html_content)
-    st.download_button(label="📥 초고화질 수능 양식 인쇄용 파일 다운로드 (딸깍)", data=perfect_html, file_name="ddalggak_math_print.html", mime="text/html")
