@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 🎨 라이트/다크모드 완벽 대응 및 미니멀 스킨 CSS (메뉴 숨김 포함)
+# 🎨 라이트/다크모드 완벽 대응 및 미니멀 스킨 CSS (메뉴 숨김 버그 코드 제거 완료)
 st.markdown("""
 <style>
 .stApp {
@@ -18,10 +18,7 @@ st.markdown("""
     background-color: var(--background-color) !important;
     border-right: 2px solid rgba(128, 128, 128, 0.25) !important;
 }
-/* 스트림릿 자동 하위 내비게이션 전면 차단 */
-[data-testid="stSidebarNav"] {
-    display: none !important;
-}
+/* 대참사를 일으켰던 stSidebarNav display none 코드를 삭제했습니다 */
 </style>
 """, unsafe_allow_html=True)
 
