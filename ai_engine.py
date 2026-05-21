@@ -9,8 +9,8 @@ class DDalGGakEngine:
         딸깍 매스 프리미엄 AI 출제 엔진 초기화
         """
         genai.configure(api_key=api_key)
-        # 수학적 추론 및 무결성 제어 능력이 가장 탁월한 gemini-2.5-pro 모델 고정
-        self.model = genai.GenerativeModel('gemini-2.5-pro')
+        # 수학적 추론 및 무결성 제어 능력이 가장 탁월한 gemini-2.5-pro 모델 고정 (flash 쓰는 중)
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     def generate_variants(self, source_text: str, source_image, variant_type: str, num_variants: int) -> str:
         """
