@@ -4,6 +4,7 @@ import requests
 import time
 from datetime import datetime
 
+# 🎨 홈 화면 전용 고도화 스킨 및 입력창 CSS
 st.markdown("""
 <style>
 .hero-section {
@@ -13,26 +14,69 @@ st.markdown("""
     border-bottom: 2px solid rgba(128, 128, 128, 0.25) !important;
     margin-bottom: 40px;
 }
-.hero-title { font-size: 2.6rem !important; font-weight: 700 !important; letter-spacing: -1px; }
-.feature-card {
-    background-color: var(--background-color) !important; padding: 32px 24px; border-radius: 16px !important;
-    border: 2px solid rgba(128, 128, 128, 0.25) !important; height: 100%; transition: all 0.25s ease;
+.hero-title { 
+    font-size: 2.6rem !important; 
+    font-weight: 700 !important; 
+    letter-spacing: -1px; 
 }
-.feature-card:hover { transform: translateY(-4px); border-color: rgba(128, 128, 128, 0.6) !important; }
-.feature-card h4 { font-size: 1.25rem !important; font-weight: 600 !important; margin-top: 14px; margin-bottom: 8px; }
-.feature-card p { opacity: 0.75; font-size: 0.95rem !important; line-height: 1.6; }
-.beta-notice-card { border: 2px solid var(--text-color) !important; padding: 35px; border-radius: 16px !important; margin-top: 40px; }
-.api-guide-box { background-color: rgba(59, 130, 246, 0.06) !important; border-left: 4px solid #3b82f6 !important; padding: 20px; border-radius: 8px; margin-top: 20px; margin-bottom: 20px; }
-.api-link { color: #3b82f6 !important; text-decoration: underline !important; font-weight: 700 !important; }
-.stTextArea textarea, .stTextInput input { background-color: var(--background-color) !important; border: 1.5px solid rgba(128, 128, 128, 0.3) !important; color: var(--text-color) !important; border-radius: 8px !important; }
+.feature-card {
+    background-color: var(--background-color) !important; 
+    padding: 32px 24px; 
+    border-radius: 16px !important;
+    border: 2px solid rgba(128, 128, 128, 0.25) !important; 
+    height: 100%; 
+    transition: all 0.25s ease;
+}
+.feature-card:hover { 
+    transform: translateY(-4px); 
+    border-color: rgba(128, 128, 128, 0.6) !important; 
+}
+.feature-card h4 { 
+    font-size: 1.25rem !important; 
+    font-weight: 600 !important; 
+    margin-top: 14px; 
+    margin-bottom: 8px; 
+}
+.feature-card p { 
+    opacity: 0.75; 
+    font-size: 0.95rem !important; 
+    line-height: 1.6; 
+}
+.beta-notice-card { 
+    border: 2px solid var(--text-color) !important; 
+    padding: 35px; 
+    border-radius: 16px !important; 
+    margin-top: 40px; 
+}
+.api-guide-box { 
+    background-color: rgba(59, 130, 246, 0.06) !important; 
+    border-left: 4px solid #3b82f6 !important; 
+    padding: 20px; 
+    border-radius: 8px; 
+    margin-top: 20px; 
+    margin-bottom: 20px; 
+}
+.api-link { 
+    color: #3b82f6 !important; 
+    text-decoration: underline !important; 
+    font-weight: 700 !important; 
+}
+.stTextArea textarea, .stTextInput input { 
+    background-color: var(--background-color) !important; 
+    border: 1.5px solid rgba(128, 128, 128, 0.3) !important; 
+    color: var(--text-color) !important; 
+    border-radius: 8px !important; 
+}
 </style>
 """, unsafe_allow_html=True)
 
+# 🗺️ 사이드바 브랜딩 및 현재 위치 표시
 with st.sidebar:
     st.markdown("<h2 style='font-size:1.4rem; font-weight:700; margin-bottom:5px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
     st.write("현재 위치: **🏠 Home**")
 
+# 메인 히어로 섹션
 st.markdown("""
 <div class="hero-section">
     <div class="hero-title">DDalGGak Math Pro</div>
@@ -40,6 +84,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# 테크놀로지 로드맵 섹션
 st.markdown("<h3 style='font-size:1.4rem; font-weight:600; margin-bottom:20px;'>📐 테크놀로지 로드맵</h3>", unsafe_allow_html=True)
 col1, col2, col3 = st.columns(3)
 
@@ -70,11 +115,12 @@ with col3:
 </div>
 """, unsafe_allow_html=True)
 
+# 오픈 베타 안내 카드
 st.markdown("""
 <div class="beta-notice-card">
-    <h3 style="margin-top:0; font-weight:700;">📢 강사 대상 프리미엄 오픈 베타 진행 중</h3>
+    <h3 style="margin-top:0; font-weight:700;">📢 프리미엄 오픈 베타 진행 중</h3>
     <p style="opacity: 0.85; line-height: 1.6; font-size: 1rem; margin-top: 12px;">
-        현재 대치동 및 학원가 현직 강사님들을 대상으로 무료 베타 테스트를 진행하고 있습니다.<br>
+        현재 현직 교육 관계자 및 학생/학부모님들을 대상으로 무료 베타 테스트를 진행하고 있습니다.<br>
         본 플랫폼의 AI 변형 출제 엔진은 구글의 Gemini API 기반으로 구동되므로, 원활한 사용을 위해 본인의 API Key 입력이 필요합니다.
     </p>
     <div class="api-guide-box">
@@ -88,25 +134,45 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# 📝 피드백 수집 및 구글 시트 연동 섹션
 st.write("")
 st.markdown("### 💬 엔진 퀄리티 향상을 위한 의견 제시")
-user_info_input = st.text_input("강사 정보 입력", placeholder="예시: 대치동 수학과 홍길동 팀장 / OO학원 원장")
-feedback_text = st.text_area("의견이나 개선 요청사항을 자유롭게 입력해 주세요", height=100, placeholder="엔진 개선을 위한 소중한 한 줄 피드백을 남겨주세요.")
+
+# 💡 요구사항 반영: '직업 입력' 창으로 변경 및 예시를 딱 4개만 노출
+user_info_input = st.text_input(
+    "직업 입력", 
+    placeholder="예시: 교사, 강사, 학생, 학부모"
+)
+
+feedback_text = st.text_area(
+    "의견이나 개선 요청사항을 자유롭게 입력해 주세요", 
+    height=100, 
+    placeholder="엔진 개선을 위한 소중한 한 줄 피드백을 남겨주세요."
+)
+
+# 3초 알림 메시지 제어용 빈 슬롯
 msg_slot = st.empty()
 
 if st.button("의견 전송하기", type="secondary"):
-    if not feedback_text: msg_slot.warning("내용을 입력하신 후 전송해 주세요.")
-    elif not user_info_input: msg_slot.warning("피드백 데이터베이스 관리를 위해 '강사 정보'를 먼저 입력해 주세요.")
+    if not feedback_text: 
+        msg_slot.warning("내용을 입력하신 후 전송해 주세요.")
+    elif not user_info_input: 
+        msg_slot.warning("피드백 데이터베이스 관리를 위해 '직업'을 먼저 입력해 주세요.")
     else:
         with st.spinner('구글 데이터베이스 시트에 안전하게 실시간 기록 중...'):
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfMMoBOa7hBNNpPcsMxePiXmAGfgI8eL20NK54p9rZv4usnvw/formResponse"
-            payload = {"entry.1056156260": feedback_text, "entry.1147584167": user_info_input}
+            payload = {
+                "entry.1056156260": feedback_text, 
+                "entry.1147584167": user_info_input
+            }
             try:
                 response = requests.post(form_url, data=payload)
                 if response.status_code == 200:
-                    msg_slot.success(f"🎉 감사합니다, {user_info_input} 선생님! 소중한 피드백이 연동된 구글 시트에 실시간 반영되었습니다.")
+                    # 3초간 메시지 띄우기 기믹 실행
+                    msg_slot.success("🎉 감사합니다! 제출해주신 피드백이 연동된 구글 시트에 실시간 반영되었습니다.")
                     time.sleep(3.0)
-                    msg_slot.empty()
-                else: msg_slot.error("시트 전송 중 일시적인 서버 지연이 발생했습니다.")
-            except Exception as e: msg_slot.error(f"구글 시트 연동 오류 발생: {e}")
+                    msg_slot.empty()  # 3초 후 메시지 박스 투명하게 폭파
+                else: 
+                    msg_slot.error("시트 전송 중 일시적인 서버 지연이 발생했습니다. 잠시 후 다시 시도해 주세요.")
+            except Exception as e: 
+                msg_slot.error(f"구글 시트 연동 오류 발생: {e}")
