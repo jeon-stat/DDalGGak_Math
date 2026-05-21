@@ -6,45 +6,50 @@ from templates import build_pdf_print_html
 
 st.set_page_config(page_title="DDalGGak Math 출제 엔진", page_icon="📐", layout="wide")
 
-# 🎨 내부 도구창도 다크/라이트에 따라 가변 텍스트 필드를 적용하되, '시험지 프리뷰'만큼은 무조건 백색 용지로 고정
+# 🎨 [라인 강화 버전] 인풋 테두리와 실물 시험지 <보기> 박스 선 두께 대폭 업그레이드 CSS
 st.markdown("""
     <style>
-    /* 전체 기본 시스템 자동 연동 */
-    .stApp, div[data-testid="stAppViewContainer"], div[data-testid="stHeader"] {
+    .stApp {
         background-color: var(--background-color) !important;
         color: var(--text-color) !important;
     }
     [data-testid="stSidebar"] {
         background-color: var(--background-color) !important;
-        border-right: 1px solid rgba(128, 128, 128, 0.1) !important;
+        border-right: 2px solid rgba(128, 128, 128, 0.25) !important;
     }
     
-    /* 인풋 박스 배경 및 테두리 유연화 (다크모드 시 어두운 계열 인풋으로 자동 호환) */
+    /* 입력 폼 박스들의 테두리선 두께를 1.5px로 늘려 가시성 확보 */
     .stTextArea textarea, .stTextInput input, .stSelectbox div {
         background-color: var(--background-color) !important;
-        border: 1px solid rgba(128, 128, 128, 0.2) !important;
+        border: 1.5px solid rgba(128, 128, 128, 0.3) !important;
         color: var(--text-color) !important;
         border-radius: 8px !important;
     }
     
-    /* 📄 [절대 규칙] 실물 시험지 렌더링 박스는 다크모드여도 '무조건 새하얀 종이' 형태 고정 */
+    /* 📄 실제 수능 시험지 용지 박스 테두리선 강화 (1px -> 2px) */
     .ddalggak-paper-sheet {
         background-color: #ffffff !important;
         padding: 45px 55px;
-        border: 1px solid #0f172a !important;
+        border: 2px solid #000000 !important; /* 묵직한 수능지 외곽선 고정 */
         box-shadow: 0 20px 50px -12px rgba(0,0,0,0.15);
         font-family: 'Noto Serif KR', 'Batang', serif !important;
         margin: 30px auto;
         max-width: 860px;
         border-radius: 4px;
     }
-    /* 시험지 내부 텍스트 및 기호는 강제로 올 블랙 처리 */
     .ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
-    .ddalggak-paper-sheet blockquote { border: 1px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
+    
+    /* ★핵심 반영★ 수능 기출 특유의 사각형 <보기> 박스 테두리를 2px 사방 실선으로 묵직하게 고정 */
+    .ddalggak-paper-sheet blockquote { 
+        border: 2px solid #000000 !important; 
+        padding: 22px !important; 
+        margin: 18px 0 !important; 
+    }
+    
     .ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
     .question-title { font-weight: bold; font-size: 1.05rem; color: #000000 !important; margin-bottom: 12px; }
     
-    .stTabs [data-baseweb="tab-list"] { border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important; }
+    .stTabs [data-baseweb="tab-list"] { border-bottom: 2px solid rgba(128, 128, 128, 0.2) !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -114,7 +119,8 @@ if st.session_state.raw_result:
     st.divider()
     html_content = ""
     for idx, q_content in enumerate(st.session_state.questions):
-        formatted_q = q_content.strip().replace(">", "<div style='border:1px solid #000; padding:15px; margin:10px 0; font-size:14px;'>").replace("\n", "<br>")
+        # 다운로드용 인쇄 파일 내부의 보기 박스 테두리선도 두껍게 연동 치환
+        formatted_q = q_content.strip().replace(">", "<div style='border:2px solid #000; padding:18px; margin:12px 0; font-size:14px;'>").replace("\n", "<br>")
         html_content += f'<div style="margin-bottom: 40px; page-break-inside: avoid;"><b style="font-size: 18px;">{idx+1}.</b> {formatted_q}</div>'
         
     perfect_html = build_pdf_print_html(html_content)
