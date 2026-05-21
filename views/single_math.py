@@ -5,7 +5,7 @@ import google.generativeai as genai
 import json
 import re
 
-# 🎨 라이트/다크모드 완벽 대응 및 미니멀 스킨 CSS
+# 🎨 라이트/다크모드 완벽 대응 및 수능 시험지 양식 프레임 CSS
 st.markdown("""
 <style>
 .stTextArea textarea, .stTextInput input, .stSelectbox div { 
@@ -14,6 +14,7 @@ st.markdown("""
     color: var(--text-color) !important; 
     border-radius: 8px !important; 
 }
+/* 📄 수능 시험지 전용 독립 프리프레임 */
 .ddalggak-paper-sheet { 
     background-color: #ffffff !important; 
     padding: 45px 55px; 
@@ -47,7 +48,7 @@ with st.sidebar:
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
     st.write("현재 위치: **📐 단일 문항 변형**")
     
-    st.divider() # 현재 위치 밑 분류 선
+    st.divider()
     
     st.header("⚙️ 출제 세부 옵션")
     api_key = st.text_input("Gemini API Key를 입력하세요", type="password")
@@ -81,11 +82,10 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
     else:
         with st.spinner('AI 출제위원이 고품질 문항을 설계 중입니다...'):
             try:
-                # 내부에서 Gemini API 실시간 연동 가동
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel('gemini-2.5-pro')
+                # 🛠️ 할당량 차단 에러(429)를 방지하기 위해 속도가 빠르고 제한이 널널한 flash 모델로 세팅
+                model = genai.GenerativeModel('gemini-2.5-flash')
                 
-                # 💡 [지민님이 요청하신 원본 프롬프트 전체 본문 탑재 완료]
                 prompt = f"""
 당신은 대한민국 한국교육과정평가원 수학 출제위원 기조의 최고 전문가 AI입니다.
 입력된 수학 문제를 분석하여, 지정된 '변형 메커니즘' 옵션 조건에 맞는 최상위 무결성 변형 문항을 출제하십시오.
@@ -125,7 +125,6 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
 
 문항 수 조건이 {num_variants}개이므로, 위 세트를 총 {num_variants}번 반복하여 렌더링하십시오.
 """
-                # 멀티모달 주입 스케줄러
                 contents = []
                 if source_image is not None:
                     contents.append(source_image)
@@ -159,7 +158,6 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
 if st.session_state.raw_result:
     st.divider()
     
-    # 수능 시험지 실물 프리뷰 박스 (외부 함수 충돌 우려가 없는 순수 내장 구조)
     st.subheader("📄 수능 시험지 실물 프리뷰")
     st.markdown('<div class="ddalggak-paper-sheet">', unsafe_allow_html=True)
     for idx, q_content in enumerate(st.session_state.questions):
@@ -168,13 +166,11 @@ if st.session_state.raw_result:
         st.write("---")
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # 정답 및 해설 섹션
     st.subheader("💡 정답 및 출제위원 해설")
     for idx, e_content in enumerate(st.session_state.explanations):
         with st.expander(f"▶ 【변형 문항 {idx+1}번】 정답 및 풀이 확인"):
             st.markdown(e_content.strip())
             
-    # AI Raw 데이터 박스
     st.write("")
     with st.expander("👁️ AI Raw 데이터 확인 (개발 및 검증용)"):
         st.text_area("AI 원본 텍스트", st.session_state.raw_result, height=200)
