@@ -140,8 +140,8 @@ st.markdown("### 💬 엔진 퀄리티 향상을 위한 의견 제시")
 
 # 💡 요구사항 반영: '직업 입력' 창으로 변경 및 예시를 딱 4개만 노출
 user_info_input = st.text_input(
-    "직업 입력", 
-    placeholder="예시: 교사, 강사, 학생, 학부모"
+    "직업을 입력해주세요", 
+    placeholder="ex) 교사, 강사, 학생, 학부모"
 )
 
 feedback_text = st.text_area(
