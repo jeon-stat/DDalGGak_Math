@@ -5,7 +5,7 @@ from ai_engine import DDalGGakEngine
 from templates import build_pdf_print_html
 
 st.set_page_config(
-    page_title="DDalGGak Math - 프리미엄 AI 수학 문제 변형 플랫폼",
+    page_title="DDalGGak Math Pro - 프리미엄 AI 수학 문제 변형 플랫폼",
     page_icon="📐",
     layout="wide"
 )
@@ -18,18 +18,15 @@ st.markdown("""
         color: var(--text-color) !important;
     }
     
-    /* 사이드바 경계선 강화 */
     [data-testid="stSidebar"] {
         background-color: var(--background-color) !important;
         border-right: 2px solid rgba(128, 128, 128, 0.25) !important;
     }
     
-    /* 스트림릿 기본 멀티페이지 메뉴 투명하게 숨김 처리 */
     [data-testid="stSidebarNav"] {
         display: none !important;
     }
     
-    /* 인풋 상자 테두리 스킨 변경 */
     .stTextArea textarea, .stTextInput input, .stSelectbox div {
         background-color: var(--background-color) !important;
         border: 1.5px solid rgba(128, 128, 128, 0.3) !important;
@@ -67,6 +64,7 @@ st.markdown("""
     .feature-card h4 { font-size: 1.25rem !important; font-weight: 600 !important; margin-top: 14px; margin-bottom: 8px; }
     .feature-card p { opacity: 0.75; font-size: 0.95rem !important; line-height: 1.6; }
     
+    /* 📢 베타 안내 카드 바깥 테두리 */
     .beta-notice-card {
         border: 2px solid var(--text-color) !important;
         padding: 35px;
@@ -74,41 +72,27 @@ st.markdown("""
         margin-top: 40px;
     }
     
+    /* 💡 API 안내 상자 (안에 코드가 안 보이도록 스킨 주입) */
     .api-guide-box {
-        background-color: rgba(128, 128, 128, 0.08) !important;
-        border-left: 4px solid #3b82f6 !important;
-        padding: 18px;
-        border-radius: 4px;
-        margin-top: 15px;
-        margin-bottom: 15px;
+        background-color: rgba(59, 130, 246, 0.06) !important; /* 투명한 블루 톤 배경 */
+        border-left: 4px solid #3b82f6 !important; /* 선명한 파란색 왼쪽 라인 */
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
     .api-link {
         color: #3b82f6 !important;
         text-decoration: underline !important;
-        font-weight: 600;
+        font-weight: 700 !important;
     }
-    
-    /* 📄 수능 시험지 렌더링 용지 스타일 */
-    .ddalggak-paper-sheet {
-        background-color: #ffffff !important;
-        padding: 45px 55px;
-        border: 2px solid #000000 !important;
-        box-shadow: 0 20px 50px -12px rgba(0,0,0,0.15);
-        font-family: 'Noto Serif KR', 'Batang', serif !important;
-        margin: 30px auto;
-        max-width: 860px;
-        border-radius: 4px;
+    .api-link:hover {
+        color: #1d4ed8 !important;
     }
-    .ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
-    .ddalggak-paper-sheet blockquote { border: 2px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
-    .ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
-    .question-title { font-weight: bold; font-size: 1.05rem; color: #000000 !important; margin-bottom: 12px; }
     </style>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# 🗺️ 사이드바 내부 커스텀 한글 메뉴판
-# ==========================================
+# 메뉴 바
 with st.sidebar:
     st.markdown("<h2 style='font-size:1.4rem; font-weight:700; margin-bottom:5px; letter-spacing:-0.5px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
@@ -119,9 +103,7 @@ with st.sidebar:
     )
     st.write("---")
 
-# ==========================================
-# [분기 1] Home 화면
-# ==========================================
+# Home 분기
 if menu_choice == "🏠 Home":
     st.markdown("""
         <div class="hero-section">
@@ -138,7 +120,7 @@ if menu_choice == "🏠 Home":
             <div class="feature-card">
                 <span style="font-size: 1.8rem;">⚙️</span>
                 <h4>평가원 수학 무결성 검증</h4>
-                <p>단순 텍스트 치환 방식이 아닙니다. 교육과정 성취기준을 추론하여 중간 연산 과정 og 정답이 유리수 형태로 딱 떨어지도록 정교하게 역산 설계합니다.</p>
+                <p>단순 텍스트 치환 방식이 아닙니다. 교육과정 성취기준을 추론하여 중간 연산 과정과 정답이 유리수 형태로 딱 떨어지도록 정교하게 역산 설계합니다.</p>
             </div>
         """, unsafe_allow_html=True)
 
@@ -147,7 +129,7 @@ if menu_choice == "🏠 Home":
             <div class="feature-card">
                 <span style="font-size: 1.8rem;">📄</span>
                 <h4>실물 시험지 컴파일러</h4>
-                <p>수능 수학 특유의 합답형 &lt;보기&gt; 박스 레이아웃과 5지선다 오답 선지 구성 원리를 수학적으로 분석하여 인쇄용 프리뷰를 즉시 렌더링합니다.</p>
+                <p>수능 수학 특유의 합답형 &lt;보기&gt; 박스 레이아웃 and 5지선다 오답 선지 구성 원리를 수학적으로 분석하여 인쇄용 프리뷰를 즉시 렌더링합니다.</p>
             </div>
         """, unsafe_allow_html=True)
 
@@ -160,18 +142,18 @@ if menu_choice == "🏠 Home":
             </div>
         """, unsafe_allow_html=True)
 
-    # 오픈 베타 안내 카드 및 API Key 발급 안내 세션
+    # ★수정 포인트★ st.markdown 전체를 묶어 unsafe_allow_html=True 처리하여 코드를 화면에서 완벽 지움
     st.markdown("""
         <div class="beta-notice-card">
             <h3 style="margin-top:0; font-weight:700;">📢 강사 대상 프리미엄 오픈 베타 진행 중</h3>
             <p style="opacity: 0.85; line-height: 1.6; font-size: 1rem; margin-top: 12px;">
                 현재 대치동 및 학원가 현직 강사님들을 대상으로 무료 베타 테스트를 진행하고 있습니다.<br>
-                본 플랫폼의 AI 변형 출제 엔진은 구글의 <b>Gemini API</b> 기반으로 구동되므로, 원활한 사용을 위해 본인의 API Key 입력이 필요합니다.
+                본 플랫폼의 AI 변형 출제 엔진은 구글의 Gemini API 기반으로 구동되므로, 원활한 사용을 위해 본인의 API Key 입력이 필요합니다.
             </p>
             
             <div class="api-guide-box">
                 💡 <b>Gemini API Key가 없으신가요?</b><br>
-                <a class="api-link" href="https://aistudio.google.com/" target="_blank">Google AI Studio (여기 클릭)</a>에 구글 계정으로 로그인하신 후, 
+                <a class="api-link" href="https://aistudio.google.com/" target="_blank">Google AI Studio (여기를 딸깍 클릭)</a>에 구글 계정으로 로그인하신 후, 
                 <b>[Get API key]</b> 버튼을 누르면 10초 만에 무료 키를 발급받으실 수 있습니다.
             </div>
             
@@ -188,9 +170,7 @@ if menu_choice == "🏠 Home":
         if feedback_text: st.success("🙏 소중한 전문 의견이 출제위원회에 전달되었습니다. 감사합니다!")
         else: st.warning("내용을 입력하신 후 전송해 주세요.")
 
-# ==========================================
-# [분기 2] AI 단일 문항 변형 엔진 화면
-# ==========================================
+# 변형기 엔진 구동 분기 (기존과 동일)
 elif menu_choice == "📐 AI 단일 문항 변형":
     st.title("📐 AI 단일 문항 변형 엔진")
     st.markdown("수능 및 내신 기출문제를 완벽하게 분석하여 무결성 변형 문제를 생성합니다.")
@@ -261,9 +241,6 @@ elif menu_choice == "📐 AI 단일 문항 변형":
         perfect_html = build_pdf_print_html(html_content)
         st.download_button(label="📥 초고화질 수능 양식 인쇄용 파일 다운로드 (딸깍)", data=perfect_html, file_name="ddalggak_math_print.html", mime="text/html")
 
-# ==========================================
-# [분기 3] 모의고사 통째로 변형 티저
-# ==========================================
 elif menu_choice == "⚡ 모의고사 통째로 변형 (준비중)":
     st.title("⚡ 모의고사 통째로 변형 (Full-Exam Converter)")
     st.markdown("시험지 PDF 한 장만 올리면 내신/수능 모의고사 30문항 전체를 원클릭 변형하는 핵심 코어 기능입니다.")
@@ -279,9 +256,6 @@ elif menu_choice == "⚡ 모의고사 통째로 변형 (준비중)":
         </div>
     """, unsafe_allow_html=True)
 
-# ==========================================
-# [분기 4] 나만의 오답 보관함 티저
-# ==========================================
 elif menu_choice == "🗂️ 나만의 오답 보관함 (준비중)":
     st.title("🗂️ 클라우드 문항 및 오답 보관함")
     st.markdown("학원 학생별 오답 노트 관리 및 나만의 시크릿 교재 단원별 데이터베이스 아카이빙 시스템입니다.")
