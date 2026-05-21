@@ -1,4 +1,3 @@
-# views/single_math.py
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
@@ -65,15 +64,16 @@ if st.button("AI 변형 실행 (딸깍)", type="primary"):
                 p = "당신은 수능 수학 출제위원입니다. 다음 원본 문제를 변형하여 '5지선다형 객관식' 문항을 출제하십시오.\n" \
                     "문항 수: " + str(num_variants) + "\n" \
                     "유형: " + variant_type + "\n\n" \
-                    "⚠️ [중요 준수 사항] ⚠️\n" \
+                    "⚠️ [치명적 준수 사항 - 위반 시 감점] ⚠️\n" \
                     "1. 수식은 무조건 $...$ 또는 $$...$$로 감싸고 LaTeX 문법을 사용하십시오. (절대로 백틱 ` 기호를 쓰지 마세요!)\n" \
-                    "2. 문제의 발문과 조건, 그리고 ①~⑤ 선지 전체를 [QUESTION_START] 토큰 안에 모두 포함시키십시오.\n" \
-                    "3. 정답과 단계별 풀이 과정을 [EXPLANATION_START] 토큰 안에 포함시키십시오.\n\n" \
+                    "2. 발문(문제 내용)을 작성한 뒤, 반드시 줄을 바꾸고 ①, ②, ③, ④, ⑤ 기호를 사용하여 5개의 객관식 선지를 직접 만들어서 명시하십시오. (선지 누락은 치명적 오류입니다!)\n" \
+                    "3. 문제의 발문, 조건, ①~⑤ 선지 전체를 [QUESTION_START] 토큰 안에 모두 포함시키십시오.\n" \
+                    "4. 정답과 단계별 풀이 과정을 [EXPLANATION_START] 토큰 안에 포함시키십시오.\n\n" \
                     "[출력 프로토콜 데이터 형식 예시]\n" \
                     "[QUESTION_START]\n" \
                     "(여기에 문제 발문과 조건 제시)\n" \
-                    "$$ f(x) = ... $$\n\n" \
-                    "① $ 10 $ ② $ 20 $ ③ $ 30 $ ④ $ 40 $ ⑤ $ 50 $\n" \
+                    "$$f(x) = ...$$\n\n" \
+                    "① $10$ ② $20$ ③ $30$ ④ $40$ ⑤ $ 50 $\n" \
                     "[QUESTION_END]\n\n" \
                     "[EXPLANATION_START]\n" \
                     "**[정답]** ⑤\n\n" \
@@ -107,14 +107,16 @@ if st.session_state.res:
     
     html_body = ""
     for idx, q in enumerate(st.session_state.qs):
-        # 백틱 강제 치환 및 마크다운 정리
+        # 💡 [버그 해결] 백틱 강제 치환 및 마크다운 정리 후 HTML 용 줄바꿈(<br>) 강제 추가
         clean_q = q.replace("`", "$").replace("**", "").replace("###", "")
+        # 파이썬 내부 줄바꿈(\n)을 html 줄바꿈 태그(<br>)로 완전히 바꿔서 선지가 문제 밑으로 확실히 떨어지도록 조치
+        clean_q = clean_q.replace("\n", "<br>")
+        
         html_body += "<div style='margin-bottom: 30px; display: flex; align-items: flex-start;'>" \
                      "<b style='font-size: 16px; margin-right: 8px; user-select: none;'>" + str(idx+1) + ".</b> " \
                      "<div style='width: 100%; word-break: break-all; white-space: pre-wrap;'>" + clean_q + "</div>" \
                      "</div>"
         
-    # 💡 [버그 종결] Javascript를 주입하여 내부 콘텐츠 길이를 계산해 iframe 높이를 '자동 조절' 합니다.
     iframe_src = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" \
                  "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>" \
                  "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>" \
@@ -136,10 +138,9 @@ if st.session_state.res:
                  "});" \
                  "</script></body></html>"
     
-    # 높이를 지정하지 않음으로써 스크립트가 보내는 높이 데이터로 자동 리사이징 되게 함
     components.html(iframe_src, width=None, scrolling=False)
     
-    # 3. 해설 출력 (수식 코드 깨짐 완벽 방어)
+    # 3. 해설 출력 (수식 코드 깨짐 완벽 방어 및 줄바꿈 강제)
     st.divider()
     st.subheader("💡 정답 및 해설")
     if not st.session_state.es:
@@ -147,8 +148,14 @@ if st.session_state.res:
     else:
         for idx, e in enumerate(st.session_state.es):
             with st.expander(f"▶ {idx+1}번 문항 해설 보기", expanded=True):
-                # AI가 실수로 뱉어낸 백틱을 수학 기호 $로 강제 치환하여 초록색 박스 버그 차단
+                # AI가 뱉어낸 백틱을 수학 기호 $로 강제 치환
                 safe_e = e.replace("`", "$")
+                
+                # 💡 [버그 해결] 마침표 뒤에 오는 공백이나 무시된 줄바꿈을 찾아 강제로 '엔터 두 번(\n\n)'으로 바꿈
+                safe_e = re.sub(r'\.\s+', '.\n\n', safe_e)
+                # 세 번 이상 과도하게 들어간 엔터는 보기 좋게 두 번으로 압축
+                safe_e = re.sub(r'\n{3,}', '\n\n', safe_e)
+                
                 st.markdown(safe_e)
 
     # 4. 파일 편집용 Raw 데이터
