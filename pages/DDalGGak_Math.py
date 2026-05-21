@@ -1,28 +1,39 @@
-# pages/📐_DDalGGak_Math.py
+# pages/DDalGGak_Math.py
 import streamlit as st
 from PIL import Image
 from ai_engine import DDalGGakEngine
 from templates import build_pdf_print_html
 
+# 메뉴 이름 및 페이지 이름 지정
+st.set_page_config(page_title="DDalGGak Math 출제 엔진", page_icon="📐", layout="wide")
+
+# 다크모드 충돌 방지 및 화이트 톤 유지 스타일
 st.markdown("""
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
-    .ddalggak-paper-sheet { background-color: #ffffff !important; padding: 40px 50px; border: 1px solid #111111 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: 'Noto Serif KR', 'Batang', serif !important; margin: 20px auto; max-width: 900px; }
+    .stApp { background-color: #f8fafc !important; color: #0f172a !important; }
+    [data-testid="stSidebar"] { background-color: #ffffff !important; border-right: 1px solid #e2e8f0; }
+    [data-testid="stSidebar"] * { color: #334155 !important; }
+    
+    /* 수능 시험지 용지 스타일 */
+    .ddalggak-paper-sheet {
+        background-color: #ffffff !important;
+        padding: 40px 50px;
+        border: 1px solid #111111 !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        font-family: 'Noto Serif KR', 'Batang', serif !important;
+        margin: 20px auto; max-width: 900px;
+    }
     .ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
     .ddalggak-paper-sheet blockquote { border: 1px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
     .ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
-    .question-title { font-weight: bold; font-size: 1.15rem; margin-bottom: 10px; }
+    .question-title { font-weight: bold; font-size: 1.1rem; color: #000000 !important; margin-bottom: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
-if 'raw_result' not in st.session_state: st.session_state.raw_result = None
-if 'questions' not in st.session_state: st.session_state.questions = []
-if 'explanations' not in st.session_state: st.session_state.explanations = []
-
 st.title("📐 DDalGGak Math 출제 엔진")
+st.markdown("수능 및 내신 기출문제를 완벽하게 분석하여 무결성 변형 문제를 생성합니다.")
 
+# 사이드바 컨트롤러 (라이트모드 대응 완료)
 with st.sidebar:
     st.header("⚙️ 딸깍 출제 옵션")
     api_key = st.text_input("Gemini API Key를 입력하세요", type="password")
@@ -38,7 +49,12 @@ else:
     uploaded_file = st.file_uploader("문제 이미지 파일 업로드", type=["png", "jpg", "jpeg"])
     if uploaded_file is not None:
         source_image = Image.open(uploaded_file)
-        st.image(source_image, caption="업로드된 원본", width=400)
+        st.image(source_image, caption="업로드된 원본 기출문제", width=400)
+
+# 실행 및 렌더링 파트 (기존 캐싱 데이터 활용 구조)
+if 'raw_result' not in st.session_state: st.session_state.raw_result = None
+if 'questions' not in st.session_state: st.session_state.questions = []
+if 'explanations' not in st.session_state: st.session_state.explanations = []
 
 if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
     if not api_key:
