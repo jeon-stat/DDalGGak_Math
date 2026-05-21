@@ -7,101 +7,99 @@ st.set_page_config(
     layout="wide"
 )
 
-# 🎨 짙은 남색을 완전히 배제한 100% Pure 화이트 & 미니멀 라인 마스터 CSS
+# 🎨 [하이브리드 테마] 라이트/다크모드에 완벽하게 동기화되는 프리미엄 CSS
 st.markdown("""
     <style>
-    /* 1. 전체 기본 배경 및 앱 컨테이너를 완벽한 흰색으로 고정 */
-    .stApp, div[data-testid="stAppViewContainer"], div[data-testid="stHeader"] {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
+    /* 1. 시스템 테마 변수를 그대로 이어받아 배경과 글씨색 자동 동기화 */
+    .stApp {
+        background-color: var(--background-color) !important;
+        color: var(--text-color) !important;
     }
     
-    /* 2. 사이드바 역시 완벽한 화이트로 통일하고 미세한 슬림 경계선만 적용 */
+    /* 2. 사이드바 영역도 시스템 테마에 맞춰 투명 가독성 확보 */
     [data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-right: 1px solid #f1f5f9 !important;
-    }
-    [data-testid="stSidebar"] * {
-        color: #334155 !important;
+        background-color: var(--background-color) !important;
+        border-right: 1px solid rgba(128, 128, 128, 0.1) !important;
     }
     
-    /* 3. 문제의 짙은 남색 배너 전면 제거 -> 화이트 매트 타이틀 섹션으로 개편 */
+    /* 3. 상단 메인 타이틀 세션 (테마 친화적 매트 라인 스타일) */
     .hero-section {
         text-align: left;
-        padding: 40px 0px 20px 0px;
-        background-color: #ffffff !important;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 40px 0px 24px 0px;
+        background-color: transparent !important;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important;
         margin-bottom: 40px;
     }
     .hero-title {
         font-size: 2.4rem !important;
         font-weight: 700 !important;
-        color: #0f172a !important;
+        color: var(--text-color) !important;
         margin-bottom: 12px;
         letter-spacing: -0.8px;
     }
     .hero-subtitle {
         font-size: 1.1rem !important;
-        color: #475569 !important;
+        color: var(--text-color) !important;
+        opacity: 0.8;
         font-weight: 400;
     }
     
-    /* 4. 빅밸류 스타일: 극도로 정교한 그림자와 선으로만 처리된 퓨어 화이트 카드 */
+    /* 4. ★핵심★ 테마별 가변 그림자 카드로 개편 (라이트: 소프트 섀도우 / 다크: 은은한 발광 효과) */
     .feature-card {
-        background-color: #ffffff !important;
-        padding: 30px 24px;
-        border-radius: 12px !important;
-        border: 1px solid #f1f5f9 !important;
+        background-color: var(--background-color) !important;
+        padding: 32px 24px;
+        border-radius: 16px !important;
+        border: 1px solid rgba(128, 128, 128, 0.1) !important;
         text-align: left;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 
-                    0 10px 40px -10px rgba(0, 0, 0, 0.02);
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        /* 다크모드에서도 텁텁하지 않도록 투명도 기반의 고급 입체 섀도우 처리 */
+        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.03), 
+                    0 1px 2px 0 rgba(0, 0, 0, 0.02);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         height: 100%;
     }
     .feature-card:hover {
-        transform: translateY(-3px);
-        border-color: #e2e8f0 !important;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.06);
+        transform: translateY(-4px);
+        border-color: rgba(128, 128, 128, 0.3) !important;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
     }
     .feature-card h4 {
-        color: #0f172a !important;
+        color: var(--text-color) !important;
         font-size: 1.2rem !important;
         font-weight: 600 !important;
         margin-top: 14px;
         margin-bottom: 8px;
-        letter-spacing: -0.3px;
     }
     .feature-card p {
-        color: #475569 !important;
+        color: var(--text-color) !important;
+        opacity: 0.75;
         font-size: 0.92rem !important;
         line-height: 1.6;
     }
     
-    /* 5. 요금제 카드 역시 화이트 톤 기반 미니멀 라인으로 매핑 */
+    /* 5. 요금제 카드 슬림 테마 매핑 */
     .price-card {
-        background-color: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-top: 3px solid #0f172a !important; /* 블랙 포인트 라인 */
+        background-color: var(--background-color) !important;
+        border: 1px solid rgba(128, 128, 128, 0.15) !important;
+        border-top: 4px solid var(--text-color) !important; /* 모드별 반전 포인트 선 */
         padding: 35px;
-        border-radius: 12px !important;
+        border-radius: 16px !important;
         text-align: center;
         box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.02);
     }
-    .price-card h3 { color: #0f172a !important; font-size: 1.25rem !important; font-weight: 600 !important; margin: 0; }
-    .price-card h2 { color: #0f172a !important; font-size: 2.4rem !important; font-weight: 700 !important; margin: 12px 0; letter-spacing: -1px; }
-    .price-card p { color: #64748b !important; font-size: 0.88rem !important; }
+    .price-card h3 { color: var(--text-color) !important; font-size: 1.25rem !important; font-weight: 600 !important; }
+    .price-card h2 { color: var(--text-color) !important; font-size: 2.4rem !important; font-weight: 700 !important; margin: 12px 0; }
+    .price-card p { color: var(--text-color) !important; opacity: 0.6; }
     .price-card ul { padding-left: 15px; margin-top: 20px; }
-    .price-card li { color: #334155 !important; font-size: 0.9rem !important; text-align: left; margin-bottom: 10px; line-height: 1.5; }
+    .price-card li { color: var(--text-color) !important; opacity: 0.85; font-size: 0.9rem !important; text-align: left; margin-bottom: 10px; }
     
-    /* 탭 메뉴 디자인 미니멀화 */
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: transparent !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-    }
+    /* 탭 메뉴 텍스트 완전 동기화 */
+    .stTabs [data-baseweb="tab-list"] { border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important; }
+    .stTabs button { color: var(--text-color) !important; opacity: 0.6; }
+    .stTabs button[aria-selected="true"] { opacity: 1 !important; font-weight: 600 !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 화이트 매트 타이틀 섹션
+# 메인 배너
 st.markdown("""
     <div class="hero-section">
         <div class="hero-title">DDalGGak Math</div>
@@ -109,8 +107,8 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# 핵심 기능 카드 배치
-st.markdown("<h3 style='color:#0f172a; font-size:1.3rem; font-weight:600; margin-bottom:20px; letter-spacing:-0.3px;'>✨ 핵심 기능 안내</h3>", unsafe_allow_html=True)
+# 기능 카드
+st.markdown("<h3 style='font-size:1.3rem; font-weight:600; margin-bottom:20px;'>✨ 핵심 기능 안내</h3>", unsafe_allow_html=True)
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -141,11 +139,10 @@ with col3:
     """, unsafe_allow_html=True)
 
 st.write("")
-st.write("")
 st.divider()
 
-# 요금제 영역
-st.markdown("<h3 style='color:#0f172a; font-size:1.3rem; font-weight:600; margin-bottom:20px; letter-spacing:-0.3px;'>💳 요금제 플랜</h3>", unsafe_allow_html=True)
+# 요금제
+st.markdown("<h3 style='font-size:1.3rem; font-weight:600; margin-bottom:20px;'>💳 요금제 플랜</h3>", unsafe_allow_html=True)
 p_col1, p_col2 = st.columns([1, 1.8])
 
 with p_col1:
@@ -154,7 +151,7 @@ with p_col1:
             <h3>강사 프리미엄</h3>
             <h2>월 39,000원</h2>
             <p>학원 교재 제작 및 기출 변형 무제한 생성</p>
-            <hr style='border:0; border-top:1px solid #f1f5f9; margin:15px 0;'>
+            <hr style='border:0; border-top:1px solid rgba(128,128,128,0.1); margin:15px 0;'>
             <ul>
                 <li>Gemini 2.5 기반 고밀도 추론 변형</li>
                 <li>수능형 실물 인쇄 전용 템플릿 제공</li>
@@ -164,6 +161,6 @@ with p_col1:
     """, unsafe_allow_html=True)
 
 with p_col2:
-    st.markdown("<h4 style='color:#0f172a; font-weight:600; margin-top:0; letter-spacing:-0.3px;'>🚀 지금 바로 시작하세요</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='font-weight:600; margin-top:0;'>🚀 지금 바로 시작하세요</h4>", unsafe_allow_html=True)
     st.write("초기 런칭 기념으로 현재 모든 강사님들께 무료 크레딧을 제공하고 있습니다. 왼쪽 메뉴에서 변형 엔진을 선택해 보세요.")
     st.info("👈 왼쪽 사이드바 메뉴창에 생성된 **[DDalGGak Math]** 탭을 누르시면 AI 변형기 화면으로 즉시 연결됩니다.")
