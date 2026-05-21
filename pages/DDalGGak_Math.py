@@ -6,11 +6,11 @@ from templates import build_pdf_print_html
 
 st.set_page_config(page_title="DDalGGak Math 출제 엔진", page_icon="📐", layout="wide")
 
-# 🎨 [디자인 전면 개편] 메인 홈과 완벽히 일치하는 미니멀 화이트 & 소프트 입체 섀도우 테마
+# 🎨 [디자인 전면 개편] 남색 기운을 싹 빼버린 미니멀 화이트 디자인
 st.markdown("""
     <style>
     /* 전체 배경 화이트 완전 고정 */
-    .stApp, div[data-testid="stAppViewContainer"] {
+    .stApp, div[data-testid="stAppViewContainer"], div[data-testid="stHeader"] {
         background-color: #ffffff !important;
         color: #1e293b !important;
     }
@@ -22,35 +22,30 @@ st.markdown("""
         color: #334155 !important;
     }
     
-    /* 입력 컴포넌트 빅밸류 스타일 매트 투명화 */
+    /* 입력창 가독성 최적화 */
     .stTextArea textarea, .stTextInput input, .stSelectbox div {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         color: #0f172a !important;
-        border-radius: 10px !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02) !important;
-    }
-    .stTextArea textarea:focus, .stTextInput input:focus {
-        border-color: #3b82f6 !important;
+        border-radius: 8px !important;
     }
     
-    /* 📄 수능 시험지 렌더링 박스 (실물 종이 텍스처 프리뷰 박스) */
+    /* 📄 실제 수능 시험지 인쇄용 프리뷰 박스 */
     .ddalggak-paper-sheet {
         background-color: #ffffff !important;
         padding: 45px 55px;
         border: 1px solid #0f172a !important;
-        box-shadow: 0 20px 50px -12px rgba(0,0,0,0.08);
+        box-shadow: 0 20px 50px -12px rgba(0,0,0,0.06);
         font-family: 'Noto Serif KR', 'Batang', serif !important;
         margin: 30px auto;
         max-width: 860px;
-        border-radius: 6px;
+        border-radius: 4px;
     }
     .ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
     .ddalggak-paper-sheet blockquote { border: 1px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
     .ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
     .question-title { font-weight: bold; font-size: 1.05rem; color: #000000 !important; margin-bottom: 12px; }
     
-    /* 탭 스타일 조정 */
     .stTabs [data-baseweb="tab-list"] {
         background-color: transparent !important;
         border-bottom: 1px solid #e2e8f0 !important;
