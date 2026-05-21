@@ -142,7 +142,7 @@ if st.session_state.res:
     </body>
     </html>"""
 
-    components.html(iframe_src, height=800, scrolling=False)
+    components.html(iframe_src, height=400, scrolling=False)
 
     # ── 3. 해설 출력 ──────────────────────────────────────
     st.divider()
