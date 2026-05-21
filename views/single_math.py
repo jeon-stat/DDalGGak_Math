@@ -26,7 +26,7 @@ iframe { display: block; margin: 0 auto !important; border: none !important; }
 with st.sidebar:
     st.markdown("<h2 style='margin-bottom:0;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.8rem; opacity:0.6; margin-bottom:20px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
-    st.write("현재 위치: **🏠 Home > 📐 변형**")
+    st.write("현재 위치: **📐 단일 변형**")
     st.divider()
     st.header("⚙️ 출제 옵션")
     api_key = st.text_input("Gemini API Key", type="password")
