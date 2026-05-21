@@ -5,7 +5,6 @@ from PIL import Image
 import google.generativeai as genai
 import re
 
-# 🎨 UI 및 사이드바 컴팩트 스타일
 st.markdown("""
 <style>
 .stTextArea textarea, .stTextInput input, .stSelectbox div { 
@@ -18,7 +17,7 @@ st.markdown("""
 [data-testid="stSidebar"] h2 { font-size: 1.2rem !important; }
 [data-testid="stSidebar"] .stHeader { font-size: 0.95rem !important; font-weight: 600 !important; }
 
-/* iframe 여백 제거 */
+/* 💡 프리뷰 컴포넌트 여백 초기화 및 중앙 정렬 */
 iframe { display: block; margin: 0 auto !important; border: none !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -51,7 +50,7 @@ if 'qs' not in st.session_state: st.session_state.qs = []
 if 'es' not in st.session_state: st.session_state.es = []
 if 'res' not in st.session_state: st.session_state.res = None
 
-# 1. 문제 생성 로직
+# 1. 문제 생성 파이프라인
 if st.button("AI 변형 실행 (딸깍)", type="primary"):
     if not api_key:
         st.error("사이드바에 API Key를 입력하세요.")
@@ -61,28 +60,22 @@ if st.button("AI 변형 실행 (딸깍)", type="primary"):
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel('gemini-2.5-flash')
                 
-                # 💡 [프롬프트 강력 통제] 수식 백틱(`) 금지 및 5지선다 의무화
+                # 💡 해설 수식 깨짐 방지를 위한 초강력 프롬프트
                 p = "당신은 수능 수학 출제위원입니다. 다음 원본 문제를 변형하여 '5지선다형 객관식' 문항을 출제하십시오.\n" \
                     "문항 수: " + str(num_variants) + "\n" \
                     "유형: " + variant_type + "\n\n" \
-                    "⚠️ [중요 준수 사항] ⚠️\n" \
-                    "1. 수식은 무조건 $...$ 또는 $$...$$로 감싸고 LaTeX 문법을 사용하십시오. (절대로 백틱 ` 기호를 쓰지 마세요!)\n" \
-                    "2. 문제의 발문과 조건, 그리고 ①~⑤ 선지 전체를 [QUESTION_START] 토큰 안에 모두 포함시키십시오.\n" \
-                    "3. 정답과 단계별 풀이 과정을 [EXPLANATION_START] 토큰 안에 포함시키십시오.\n\n" \
-                    "[출력 프로토콜 데이터 형식 예시]\n" \
-                    "[QUESTION_START]\n" \
-                    "(여기에 문제 발문과 조건 제시)\n" \
-                    "$$ f(x) = ... $$\n\n" \
-                    "① $ 10 $ ② $ 20 $ ③ $ 30 $ ④ $ 40 $ ⑤ $ 50 $\n" \
-                    "[QUESTION_END]\n\n" \
+                    "⚠️ [치명적 중요 지침 - 위반 시 감점] ⚠️\n" \
+                    "1. 모든 수식은 절대로 백틱(`) 기호를 사용하여 코드 형태로 묶지 마십시오!!\n" \
+                    "2. 수식은 무조건 $ 기호를 사용하여 감싸십시오. (예: $2\\sin\\theta + 1 = 0$)\n" \
+                    "3. [QUESTION_START] 토큰 안에 문제 발문, 조건, ①~⑤ 선지를 모두 작성하십시오.\n" \
+                    "4. [EXPLANATION_START] 토큰 안에 정답과 해설을 작성하십시오.\n\n" \
+                    "[해설 출력 예시]\n" \
                     "[EXPLANATION_START]\n" \
                     "**[정답]** ⑤\n\n" \
-                    "**[출제 의도]** (개념 및 추론 핵심 한 줄 요약)\n\n" \
+                    "**[출제 의도]** 삼각함수의 덧셈정리 활용\n\n" \
                     "**[단계별 풀이]**\n" \
-                    "- **Step 1:** (조건 분석 및 첫 수식 전개)\n" \
-                    "- **Step 2:** (핵심 뼈대 연산 및 케이스 분류)\n" \
-                    "- **Step 3:** (최종 답 도출)\n" \
-                    "⚠️ 줄글로 길게 늘어놓지 말고, 수식과 지시어를 활용해 핵심 연산 흐름만 컴팩트하게 압축하십시오.\n" \
+                    "- **Step 1:** 방정식 $\\sin x = 1$ 을 전개한다.\n" \
+                    "- **Step 2:** 주어진 식에 대입하여 $\\cos x$ 를 구한다.\n" \
                     "[EXPLANATION_END]\n\n" \
                     "원본 데이터: " + source_text
 
@@ -100,46 +93,58 @@ if st.button("AI 변형 실행 (딸깍)", type="primary"):
             except Exception as e:
                 st.error("오류: " + str(e))
 
-# 2. 결과 렌더링 (실제 시험지 프리뷰)
+# =======================================================================================
+# 💡 [핵심 방어선] AI가 백틱(`)을 썼다면 강제로 $ 수식 기호로 치환하는 무결성 클리너 함수
+# =======================================================================================
+def clean_latex_backticks(text):
+    if not text: return text
+    # 1. ```math 형식의 블록 치환
+    text = re.sub(r'```[a-zA-Z]*\n(.*?)\n```', r'$$\1$$', text, flags=re.DOTALL)
+    # 2. 잔여 백틱(`)을 $로 치환 (인라인 코드 해결)
+    text = re.sub(r'`([^`]+)`', r'$\1$', text)
+    return text
+
+# 2. 결과 렌더링
 if st.session_state.res:
     st.divider()
     st.subheader("📄 수능 시험지 실물 프리뷰")
     
     html_body = ""
     for idx, q in enumerate(st.session_state.qs):
-        # 백틱 강제 치환 및 마크다운 정리
-        clean_q = q.replace("`", "$").replace("**", "").replace("###", "")
-        html_body += "<div style='margin-bottom: 30px; display: flex; align-items: flex-start;'>" \
+        # 마크다운 찌꺼기 및 백틱 완전 정화
+        clean_q = clean_latex_backticks(q.replace("**", "").replace("###", ""))
+        html_body += "<div style='margin-bottom: 20px; display: flex; align-items: flex-start;'>" \
                      "<b style='font-size: 16px; margin-right: 8px; user-select: none;'>" + str(idx+1) + ".</b> " \
-                     "<div style='width: 100%; word-break: break-all; white-space: pre-wrap;'>" + clean_q + "</div>" \
+                     "<div style='width: 100%; word-break: break-all;'>" + clean_q + "</div>" \
                      "</div>"
         
-    # 💡 [버그 종결] Javascript를 주입하여 내부 콘텐츠 길이를 계산해 iframe 높이를 '자동 조절' 합니다.
+    # 💡 [핵심 교정] 위/아래 여백을 정확히 일치시키고, ResizeObserver로 세로 높이 자동 맞춤
     iframe_src = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" \
                  "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>" \
                  "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>" \
                  "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>" \
                  "<link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>" \
                  "<style>" \
-                 "body { margin: 0; padding: 10px; background-color: transparent; font-family: 'Noto Serif KR', 'Batang', serif; font-size: 14.5px; line-height: 1.7; }" \
-                 ".paper-box { background-color: #ffffff; color: #000000; padding: 35px 40px; max-width: 520px; margin: 0 auto; border: 1px solid #ccc; box-shadow: 0px 4px 12px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }" \
+                 "html, body { background-color: #eef2f5 !important; margin: 0; padding: 20px 0; display: flex; justify-content: center; overflow: hidden; }" \
+                 ".paper-box { background-color: #ffffff; color: #000000; padding: 50px 45px; width: 480px; box-sizing: border-box; font-family: 'Noto Serif KR', 'Batang', serif; font-size: 14.5px; line-height: 1.75; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }" \
                  "</style></head><body>" \
-                 "<div class='paper-box' id='paper'>" + html_body + "</div>" \
+                 "<div class='paper-box'>" + html_body + "</div>" \
                  "<script>" \
                  "document.addEventListener('DOMContentLoaded', function(){" \
                  "  renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}], throwOnError:false});" \
-                 "  setTimeout(function() {" \
-                 "      var paper = document.getElementById('paper');" \
-                 "      var newHeight = paper.offsetHeight + 30;" \
-                 "      window.parent.postMessage({type: 'streamlit:setFrameHeight', height: newHeight}, '*');" \
-                 "  }, 300);" \
+                 "  const observer = new ResizeObserver(entries => {" \
+                 "    for (let entry of entries) {" \
+                 "      const height = document.documentElement.scrollHeight;" \
+                 "      window.parent.postMessage({type: 'streamlit:setFrameHeight', height: height}, '*');" \
+                 "    }" \
+                 "  });" \
+                 "  observer.observe(document.body);" \
                  "});" \
                  "</script></body></html>"
     
-    # 높이를 지정하지 않음으로써 스크립트가 보내는 높이 데이터로 자동 리사이징 되게 함
-    components.html(iframe_src, width=None, scrolling=False)
+    components.html(iframe_src, width=540, scrolling=False)
     
-    # 3. 해설 출력 (수식 코드 깨짐 완벽 방어)
+    # 3. 정답 및 해설 (수식 깨짐 제로 방어선)
     st.divider()
     st.subheader("💡 정답 및 해설")
     if not st.session_state.es:
@@ -147,16 +152,14 @@ if st.session_state.res:
     else:
         for idx, e in enumerate(st.session_state.es):
             with st.expander(f"▶ {idx+1}번 문항 해설 보기", expanded=True):
-                # AI가 실수로 뱉어낸 백틱을 수학 기호 $로 강제 치환하여 초록색 박스 버그 차단
-                safe_e = e.replace("`", "$")
+                # AI가 뱉어낸 모든 백틱 코드를 $로 정화하여 렌더링
+                safe_e = clean_latex_backticks(e)
                 st.markdown(safe_e)
 
-    # 4. 파일 편집용 Raw 데이터
+    # 4. 파일 편집용 자산
     st.write("")
     with st.expander("📥 선생님 편집용 수식 텍스트 (HWP/Word 복사용)"):
         raw_text = ""
         for idx, q in enumerate(st.session_state.qs):
-            # 파일 데이터에도 백틱 오류 치환 적용
-            clean_raw_q = q.replace("`", "$")
-            raw_text += f"[{idx+1}번]\n{clean_raw_q}\n\n"
+            raw_text += f"[{idx+1}번]\n{clean_latex_backticks(q)}\n\n"
         st.text_area("LaTeX 데이터", value=raw_text.strip(), height=150)
