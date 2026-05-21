@@ -2,10 +2,9 @@
 import streamlit as st
 from PIL import Image
 import google.generativeai as genai
-import json
 import re
 
-# 🎨 라이트/다크모드 완벽 대응 및 수능 시험지 양식 프레임 CSS
+# 🎨 [디자인 최종 정비] 입력창 스타일 및 사이드바 폰트 축소 CSS
 st.markdown("""
 <style>
 .stTextArea textarea, .stTextInput input, .stSelectbox div { 
@@ -14,23 +13,7 @@ st.markdown("""
     color: var(--text-color) !important; 
     border-radius: 8px !important; 
 }
-/* 📄 수능 시험지 전용 독립 프리프레임 */
-.ddalggak-paper-sheet { 
-    background-color: #ffffff !important; 
-    padding: 45px 55px; 
-    border: 2px solid #000000 !important; 
-    box-shadow: 0 20px 50px -12px rgba(0,0,0,0.15); 
-    font-family: 'Noto Serif KR', 'Batang', serif !important; 
-    margin: 30px auto; 
-    max-width: 860px; 
-    border-radius: 4px; 
-}
-.ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
-.ddalggak-paper-sheet blockquote { border: 2px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
-.ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
-.question-title { font-weight: bold; font-size: 1.05rem; color: #000000 !important; margin-bottom: 12px; }
-
-/* 📐 왼쪽 사이드바 옵션 글씨 크기 정밀 축소 스킨 */
+/* 📐 왼쪽 사이드바 옵션 글씨 크기 오밀조밀하게 축소 */
 [data-testid="stSidebar"] { font-size: 0.88rem !important; }
 [data-testid="stSidebar"] h2 { font-size: 1.3rem !important; }
 [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] .stHeader {
@@ -42,7 +25,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 🗺️ 사이드바 옵션 및 컨트롤러 메뉴
+# 🗺️ 사이드바 컨트롤러 메뉴
 with st.sidebar:
     st.markdown("<h2 style='font-size:1.4rem; font-weight:700; margin-bottom:5px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
@@ -70,12 +53,12 @@ else:
         source_image = Image.open(uploaded_file)
         st.image(source_image, caption="업로드된 원본 기출문제", width=280)
 
-# 세션 상태 메모리 방어선 초기화
+# 세션 상태 초기화
 if 'raw_result' not in st.session_state: st.session_state.raw_result = None
 if 'questions' not in st.session_state: st.session_state.questions = []
 if 'explanations' not in st.session_state: st.session_state.explanations = []
 
-# 변형 실행 메인 스케줄러
+# 변형 실행 메인 로직
 if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
     if not api_key:
         st.error("🔑 사이드바에 API Key를 입력하세요!")
@@ -83,7 +66,6 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
         with st.spinner('AI 출제위원이 고품질 문항을 설계 중입니다...'):
             try:
                 genai.configure(api_key=api_key)
-                # 🛠️ 할당량 차단 에러(429)를 방지하기 위해 속도가 빠르고 제한이 널널한 flash 모델로 세팅
                 model = genai.GenerativeModel('gemini-2.5-flash')
                 
                 prompt = f"""
@@ -133,7 +115,6 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
                 response = model.generate_content(contents)
                 raw_result = response.text
                 
-                # 텍스트 파싱 처리
                 q_pattern = re.compile(r'\[QUESTION_START\](.*?)\[QUESTION_END\]', re.DOTALL)
                 e_pattern = re.compile(r'\[EXPLANATION_START\](.*?)\[EXPLANATION_END\]', re.DOTALL)
                 
@@ -145,7 +126,7 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
                 
                 if not questions:
                     questions.append(raw_result)
-                    explanations.append("해설 분리 실패 - Raw 데이터 참조")
+                    explanations.append("해설 분리 실패")
                     
                 st.session_state.raw_result = raw_result
                 st.session_state.questions = questions
@@ -154,23 +135,52 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
             except Exception as e:
                 st.error(f"❌ 에러 발생: {e}")
 
-# 📄 최종 결과 렌더링 파트
+# 📄 [최종 해결] 생성된 문제를 실제 시험지 형식의 하얀색 박스 안에 완벽히 가두어 렌더링하는 파트
 if st.session_state.raw_result:
     st.divider()
-    
     st.subheader("📄 수능 시험지 실물 프리뷰")
-    st.markdown('<div class="ddalggak-paper-sheet">', unsafe_allow_html=True)
-    for idx, q_content in enumerate(st.session_state.questions):
-        st.markdown(f'<div class="question-title">【변형 문항 {idx+1}번】</div>', unsafe_allow_html=True)
-        st.markdown(q_content.strip(), unsafe_allow_html=True)
-        st.write("---")
-    st.markdown('</div>', unsafe_allow_html=True)
     
+    # 💡 쪼개어 출력하지 않고, HTML 전체 레이아웃 문자열을 하나로 완벽히 묶어서 단 한 번만 호출합니다.
+    # 이렇게 하면 상단 빈 박스 현상이 물리적으로 불가능해지며, 무조건 하얀 종이 프레임 안에 글자가 들어갑니다.
+    paper_html = """
+    <div style="
+        background-color: #ffffff !important; 
+        color: #000000 !important;
+        padding: 40px 50px; 
+        border: 2px solid #000000 !important; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15); 
+        font-family: 'Noto Serif KR', 'Batang', serif !important; 
+        margin: 20px auto; 
+        max-width: 840px; 
+        border-radius: 4px;
+        line-height: 1.7;
+    ">
+    """
+    
+    for idx, q_content in enumerate(st.session_state.questions):
+        paper_html += f"""
+        <div style="margin-bottom: 35px; color: #000000 !important;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #000000 !important; margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 4px;">
+                【변형 문항 {idx+1}번】
+            </div>
+            <div style="color: #000000 !important; font-size: 1.02rem !important;">
+                {q_content}
+            </div>
+        </div>
+        """
+    
+    paper_html += "</div>"
+    
+    # 상단 깨짐 없이 단 한 번에 주입하는 절대 방어선
+    st.markdown(paper_html, unsafe_allow_html=True)
+    
+    # 정답 및 해설 섹션
     st.subheader("💡 정답 및 출제위원 해설")
     for idx, e_content in enumerate(st.session_state.explanations):
         with st.expander(f"▶ 【변형 문항 {idx+1}번】 정답 및 풀이 확인"):
             st.markdown(e_content.strip())
             
+    # AI Raw 데이터 박스
     st.write("")
     with st.expander("👁️ AI Raw 데이터 확인 (개발 및 검증용)"):
-        st.text_area("AI 원본 텍스트", st.session_state.raw_result, height=200)
+        st.text_area("AI 원본 텍스트", st.session_state.raw_result, height=150)
