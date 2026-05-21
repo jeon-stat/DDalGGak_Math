@@ -6,50 +6,45 @@ from templates import build_pdf_print_html
 
 st.set_page_config(page_title="DDalGGak Math 출제 엔진", page_icon="📐", layout="wide")
 
-# 🎨 [디자인 전면 개편] 남색 기운을 싹 빼버린 미니멀 화이트 디자인
+# 🎨 내부 도구창도 다크/라이트에 따라 가변 텍스트 필드를 적용하되, '시험지 프리뷰'만큼은 무조건 백색 용지로 고정
 st.markdown("""
     <style>
-    /* 전체 배경 화이트 완전 고정 */
+    /* 전체 기본 시스템 자동 연동 */
     .stApp, div[data-testid="stAppViewContainer"], div[data-testid="stHeader"] {
-        background-color: #ffffff !important;
-        color: #1e293b !important;
+        background-color: var(--background-color) !important;
+        color: var(--text-color) !important;
     }
     [data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-right: 1px solid #f1f5f9 !important;
-    }
-    [data-testid="stSidebar"] * {
-        color: #334155 !important;
+        background-color: var(--background-color) !important;
+        border-right: 1px solid rgba(128, 128, 128, 0.1) !important;
     }
     
-    /* 입력창 가독성 최적화 */
+    /* 인풋 박스 배경 및 테두리 유연화 (다크모드 시 어두운 계열 인풋으로 자동 호환) */
     .stTextArea textarea, .stTextInput input, .stSelectbox div {
-        background-color: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        color: #0f172a !important;
+        background-color: var(--background-color) !important;
+        border: 1px solid rgba(128, 128, 128, 0.2) !important;
+        color: var(--text-color) !important;
         border-radius: 8px !important;
     }
     
-    /* 📄 실제 수능 시험지 인쇄용 프리뷰 박스 */
+    /* 📄 [절대 규칙] 실물 시험지 렌더링 박스는 다크모드여도 '무조건 새하얀 종이' 형태 고정 */
     .ddalggak-paper-sheet {
         background-color: #ffffff !important;
         padding: 45px 55px;
         border: 1px solid #0f172a !important;
-        box-shadow: 0 20px 50px -12px rgba(0,0,0,0.06);
+        box-shadow: 0 20px 50px -12px rgba(0,0,0,0.15);
         font-family: 'Noto Serif KR', 'Batang', serif !important;
         margin: 30px auto;
         max-width: 860px;
         border-radius: 4px;
     }
+    /* 시험지 내부 텍스트 및 기호는 강제로 올 블랙 처리 */
     .ddalggak-paper-sheet * { color: #000000 !important; background-color: transparent !important; }
     .ddalggak-paper-sheet blockquote { border: 1px solid #000000 !important; padding: 20px !important; margin: 15px 0 !important; }
     .ddalggak-paper-sheet .katex, .ddalggak-paper-sheet .katex * { color: #000000 !important; }
     .question-title { font-weight: bold; font-size: 1.05rem; color: #000000 !important; margin-bottom: 12px; }
     
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: transparent !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-    }
+    .stTabs [data-baseweb="tab-list"] { border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important; }
     </style>
 """, unsafe_allow_html=True)
 
