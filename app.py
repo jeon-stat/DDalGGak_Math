@@ -5,7 +5,7 @@ from ai_engine import DDalGGakEngine
 from templates import build_pdf_print_html
 
 st.set_page_config(
-    page_title="DDalGGak Math Pro - 프리미엄 AI 수학 문제 변형 플랫폼",
+    page_title="DDalGGak Math - 프리미엄 AI 수학 문제 변형 플랫폼",
     page_icon="📐",
     layout="wide"
 )
@@ -24,7 +24,7 @@ st.markdown("""
         border-right: 2px solid rgba(128, 128, 128, 0.25) !important;
     }
     
-    /* 스트림릿이 자동으로 긁어오는 영문 pages 메뉴를 투명하게 숨김 처리 (대참사 원인 제거) */
+    /* 스트림릿 기본 멀티페이지 메뉴 투명하게 숨김 처리 */
     [data-testid="stSidebarNav"] {
         display: none !important;
     }
@@ -74,6 +74,20 @@ st.markdown("""
         margin-top: 40px;
     }
     
+    .api-guide-box {
+        background-color: rgba(128, 128, 128, 0.08) !important;
+        border-left: 4px solid #3b82f6 !important;
+        padding: 18px;
+        border-radius: 4px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    .api-link {
+        color: #3b82f6 !important;
+        text-decoration: underline !important;
+        font-weight: 600;
+    }
+    
     /* 📄 수능 시험지 렌더링 용지 스타일 */
     .ddalggak-paper-sheet {
         background-color: #ffffff !important;
@@ -93,13 +107,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🗺️ 사이드바 내부에 수동으로 그리는 한글 메뉴판
+# 🗺️ 사이드바 내부 커스텀 한글 메뉴판
 # ==========================================
 with st.sidebar:
     st.markdown("<h2 style='font-size:1.4rem; font-weight:700; margin-bottom:5px; letter-spacing:-0.5px;'>📐 DDalGGak Math</h2>", unsafe_allow_html=True)
     st.markdown("<p style='font-size:0.85rem; opacity:0.6; margin-bottom:25px;'>Premium EdTech SaaS</p>", unsafe_allow_html=True)
     
-    # 영문 파일 이름 시스템을 완전히 무시하고 개발자가 지정한 한글 메뉴로 라우팅
     menu_choice = st.radio(
         "플랫폼 메뉴",
         ["🏠 Home", "📐 AI 단일 문항 변형", "⚡ 모의고사 통째로 변형 (준비중)", "🗂️ 나만의 오답 보관함 (준비중)"]
@@ -125,7 +138,7 @@ if menu_choice == "🏠 Home":
             <div class="feature-card">
                 <span style="font-size: 1.8rem;">⚙️</span>
                 <h4>평가원 수학 무결성 검증</h4>
-                <p>단순 텍스트 치환 방식이 아닙니다. 교육과정 성취기준을 추론하여 중간 연산 과정과 정답이 유리수 형태로 딱 떨어지도록 정교하게 역산 설계합니다.</p>
+                <p>단순 텍스트 치환 방식이 아닙니다. 교육과정 성취기준을 추론하여 중간 연산 과정 og 정답이 유리수 형태로 딱 떨어지도록 정교하게 역산 설계합니다.</p>
             </div>
         """, unsafe_allow_html=True)
 
@@ -147,12 +160,23 @@ if menu_choice == "🏠 Home":
             </div>
         """, unsafe_allow_html=True)
 
+    # 오픈 베타 안내 카드 및 API Key 발급 안내 세션
     st.markdown("""
         <div class="beta-notice-card">
             <h3 style="margin-top:0; font-weight:700;">📢 강사 대상 프리미엄 오픈 베타 진행 중</h3>
             <p style="opacity: 0.85; line-height: 1.6; font-size: 1rem; margin-top: 12px;">
                 현재 대치동 및 학원가 현직 강사님들을 대상으로 무료 베타 테스트를 진행하고 있습니다.<br>
-                왼쪽 메뉴에서 <b>[📐 AI 단일 문항 변형]</b>을 누르시면 엔진 화면으로 즉시 진입합니다!
+                본 플랫폼의 AI 변형 출제 엔진은 구글의 <b>Gemini API</b> 기반으로 구동되므로, 원활한 사용을 위해 본인의 API Key 입력이 필요합니다.
+            </p>
+            
+            <div class="api-guide-box">
+                💡 <b>Gemini API Key가 없으신가요?</b><br>
+                <a class="api-link" href="https://aistudio.google.com/" target="_blank">Google AI Studio (여기 클릭)</a>에 구글 계정으로 로그인하신 후, 
+                <b>[Get API key]</b> 버튼을 누르면 10초 만에 무료 키를 발급받으실 수 있습니다.
+            </div>
+            
+            <p style="font-weight: 600; margin-top: 15px; font-size: 1.05rem;">
+                👈 Key를 발급받으신 후, 왼쪽 메뉴에서 <b>[📐 AI 단일 문항 변형]</b>을 누르고 사이드바 입력창에 붙여넣어 보세요!
             </p>
         </div>
     """, unsafe_allow_html=True)
