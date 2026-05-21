@@ -1,3 +1,4 @@
+# views/single_math.py
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
@@ -18,6 +19,13 @@ st.markdown("""
 [data-testid="stSidebar"] label p { font-size: 0.85rem !important; }
 [data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] p { font-size: 0.85rem !important; }
 [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label span p { font-size: 0.82rem !important; }
+
+/* iframe 프리뷰 박스가 중앙에 이쁘게 배치되도록 정렬 보정 */
+[data-testid="stHorizontalBlock"] iframe, .element-container iframe {
+    display: block;
+    margin: 0 auto !important;
+    border: none !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -50,6 +58,7 @@ if 'raw_result' not in st.session_state: st.session_state.raw_result = None
 if 'questions' not in st.session_state: st.session_state.questions = []
 if 'explanations' not in st.session_state: st.session_state.explanations = []
 
+# 1. 문제 생성 파이프라인
 if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
     if not api_key:
         st.error("🔑 사이드바에 API Key를 입력하세요!")
@@ -110,6 +119,7 @@ if st.button("AI 프리미엄 문제 변형 실행 (딸깍)", type="primary"):
             except Exception as e:
                 st.error("❌ 에러 발생: " + str(e))
 
+# 2 & 3. 문법 자산 보존 및 수능 규격 미러링 프리뷰
 if st.session_state.raw_result:
     st.divider()
     st.subheader("📄 수능 시험지 실물 프리뷰")
@@ -117,22 +127,29 @@ if st.session_state.raw_result:
     html_iframe_body = ""
     for idx, q_content in enumerate(st.session_state.questions):
         clean_q = q_content.replace("**", "").replace("###", "")
-        html_iframe_body += "<div style='margin-bottom: 40px; display: flex; align-items: flex-start;'>"
-        html_iframe_body += "<span style='font-weight: 800; font-size: 16px; margin-right: 8px; user-select: none;'>" + str(idx+1) + ".</span>"
-        html_iframe_body += "<div style='width: 100%; word-break: break-all;'>" + clean_q + "</div>"
-        html_iframe_body += "</div>"
+        html_iframe_body += "<div style='margin-bottom: 35px; display: flex; align-items: flex-start;'>" \
+                            "<span style='font-weight: 800; font-size: 15px; margin-right: 6px; user-select: none;'>" + str(idx+1) + ".</span>" \
+                            "<div style='width: 100%; word-break: break-all; text-align: justify;'>" + clean_q + "</div>" \
+                            "</div>"
         
+    # 💡 [핵심 교정] 가로폭을 580px로 엄격하게 고정하고, 양옆 그림자 스킨을 입혀 실제 수능지 레이아웃 비율을 강제 구현
     preview_sandbox_html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" \
                            "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>" \
                            "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>" \
                            "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>" \
                            "<link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>" \
-                           "<style>body { background-color: #ffffff !important; color: #000000 !important; margin: 0; padding: 30px 35px; font-family: \"Noto Serif KR\", \"Batang\", serif !important; font-size: 14.5px; line-height: 1.75; } blockquote { border: 1.5px solid #000000 !important; padding: 15px !important; margin: 12px 0 !important; font-size: 13.5px; }</style>" \
-                           "</head><body>" + html_iframe_body + "" \
+                           "<style>" \
+                           "html, body { background-color: #eef2f5 !important; margin: 0; padding: 0; display: flex; justify-content: center; }" \
+                           ".paper-sheet { background-color: #ffffff !important; color: #000000 !important; width: 540px; min-height: 100vh; padding: 40px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); box-sizing: border-box; font-family: \"Noto Serif KR\", \"Batang\", serif !important; font-size: 14px; line-height: 1.7; }" \
+                           "blockquote { border: 1.5px solid #000000 !important; padding: 12px !important; margin: 10px 0 !important; font-size: 13px; background: transparent !important; }" \
+                           "</style>" \
+                           "</head><body>" \
+                           "<div class='paper-sheet'>" + html_iframe_body + "</div>" \
                            "<script>document.addEventListener(\"DOMContentLoaded\", function() { renderMathInElement(document.body, { delimiters: [ {left: \"$$\", right: \"$$\", display: true}, {left: \"$\", right: \"$\", display: false} ], throwOnError : false }); });</script>" \
                            "</body></html>"
     
-    components.html(preview_sandbox_html, height=450, scrolling=True)
+    # 가로 세로 수능 시험지 맞춤형 해상도로 샌드박스 송출
+    components.html(preview_sandbox_html, width=620, height=520, scrolling=True)
     
     st.divider()
     st.subheader("📥 다운로드 및 파일 편집용 문법 자산")
