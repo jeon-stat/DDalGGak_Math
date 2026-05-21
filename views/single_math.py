@@ -10,9 +10,14 @@ from PIL import Image
 
 from ai_engine import DDalGGakEngine
 from components import render_sidebar
-from styles import SINGLE_MATH_CSS
 
-st.markdown(SINGLE_MATH_CSS, unsafe_allow_html=True)
+st.markdown("""
+<style>
+.stTextArea textarea, .stTextInput input, .stSelectbox div { background-color:var(--background-color) !important; border:1.5px solid rgba(128,128,128,0.3) !important; color:var(--text-color) !important; border-radius:8px !important; }
+[data-testid="stSidebar"] { font-size:0.85rem !important; }
+iframe { display:block; margin:0 auto !important; border:none !important; }
+</style>
+""", unsafe_allow_html=True)
 
 # ── 사이드바 ──────────────────────────────────────────────
 render_sidebar("🏠 Home > 📐 변형")
