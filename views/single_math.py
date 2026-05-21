@@ -85,45 +85,68 @@ if st.session_state.res:
             f"</div>"
         )
 
-    iframe_src = (
-        "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
-        "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>"
-        "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>"
-        "<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>"
-        "<link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>"
-        "<style>"
-        "body{margin:0;padding:10px;background-color:transparent;"
-        "font-family:'Noto Serif KR','Batang',serif;font-size:14.5px;line-height:1.7;}"
-        ".paper-box{background-color:#ffffff;color:#000000;padding:35px 40px;"
-        "max-width:520px;margin:0 auto;border:1px solid #ccc;"
-        "box-shadow:0px 4px 12px rgba(0,0,0,0.1);border-radius:4px;overflow:hidden;}"
-        "</style></head><body>"
-        f"<div class='paper-box' id='paper'>{html_body}</div>"
-        "<script>"
-        "document.addEventListener('DOMContentLoaded',function(){"
-        "renderMathInElement(document.body,{delimiters:["
-        "{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],"
-        "throwOnError:false});"
-        "function sendHeight(){"
-        "var paper=document.getElementById('paper');"
-        "var h=paper.getBoundingClientRect().height;"
-        "window.parent.postMessage({type:'streamlit:setFrameHeight',height:h+40},'*');"
-        "}"
-        "renderMathInElement(document.body,{"
-        "delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],"
-        "throwOnError:false,"
-        "afterTypeset:function(){sendHeight();}"  # ← 수식 렌더링 완료 직후 높이 전송
-        "});"
-        "sendHeight();"  # 혹시 수식 없을 때를 위한 즉시 실행
-        "var last=0;"
-        "setInterval(function(){"  # 0.1초마다 높이 변화 감지
-        "var h=document.getElementById('paper').getBoundingClientRect().height+40;"
-        "if(Math.abs(h-last)>2){last=h;"
-        "window.parent.postMessage({type:'streamlit:setFrameHeight',height:h},'*');}"
-        "},100);"
-        "</script></body></html>"
-    )
-    components.html(iframe_src, height=2000, scrolling=False))
+    iframe_src = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'>
+<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js'></script>
+<link href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap' rel='stylesheet'>
+<style>
+body {{
+    margin: 0;
+    padding: 10px;
+    background-color: transparent;
+    font-family: 'Noto Serif KR', 'Batang', serif;
+    font-size: 14.5px;
+    line-height: 1.7;
+}}
+.paper-box {{
+    background-color: #ffffff;
+    color: #000000;
+    padding: 35px 40px;
+    max-width: 520px;
+    margin: 0 auto;
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}}
+</style>
+</head>
+<body>
+<div class='paper-box' id='paper'>{html_body}</div>
+<script>
+function sendHeight() {{
+    var paper = document.getElementById('paper');
+    var h = paper.getBoundingClientRect().height;
+    window.parent.postMessage({{type: 'streamlit:setFrameHeight', height: h + 40}}, '*');
+}}
+
+document.addEventListener('DOMContentLoaded', function() {{
+    renderMathInElement(document.body, {{
+        delimiters: [
+            {{left: '$$', right: '$$', display: true}},
+            {{left: '$',  right: '$',  display: false}}
+        ],
+        throwOnError: false
+    }});
+    sendHeight();
+    var last = 0;
+    setInterval(function() {{
+        var h = document.getElementById('paper').getBoundingClientRect().height + 40;
+        if (Math.abs(h - last) > 2) {{
+            last = h;
+            window.parent.postMessage({{type: 'streamlit:setFrameHeight', height: h}}, '*');
+        }}
+    }}, 100);
+}});
+</script>
+</body>
+</html>"""
+
+    components.html(iframe_src, height=2000, scrolling=False)
 
     # ── 3. 해설 출력 ──────────────────────────────────────
     st.divider()
