@@ -1,6 +1,5 @@
 # templates.py
 
-# Gemini 출제를 제어하는 절대 마스터 시스템 프롬프트
 SYSTEM_PROMPT = """
 너는 대한민국 평가원 수능 수학 출제위원이다. 입력된 문제를 분석하여 고품질 변형 문항을 생성하라.
 
@@ -29,8 +28,7 @@ SYSTEM_PROMPT = """
 - 상세 풀이: 풀이 과정을 자세히 적으시오.
 """
 
-# 초고화질 PDF 인쇄를 위한 웹 컴파일 템플릿
-def get_perfect_print_html(html_questions_content):
+def build_pdf_print_html(html_questions_content):
     return f"""
     <!DOCTYPE html>
     <html>
