@@ -7,6 +7,7 @@ from PIL import Image
 
 from ai_engine import DDalGGakEngine
 from components import render_sidebar
+from config import PROVIDER_GEMINI, PROVIDER_OPENAI
 from renderers.single_math_result import render_generated_result
 
 st.markdown("""
@@ -23,7 +24,10 @@ render_sidebar("🏠 Home > 📐 변형")
 with st.sidebar:
     st.divider()
     st.header("⚙️ 출제 옵션")
-    api_key      = st.text_input("Gemini API Key", type="password")
+    ai_provider = st.selectbox("AI 제공자", [PROVIDER_GEMINI, PROVIDER_OPENAI])
+    st.caption("선택한 제공자의 API Key를 입력해야 문항을 생성할 수 있습니다.")
+    api_label = "OpenAI API Key" if ai_provider == PROVIDER_OPENAI else "Gemini API Key"
+    api_key      = st.text_input(api_label, type="password")
     num_variants = st.slider("문항 수", 1, 5, 1)
     variant_type = st.radio(
         "변형 유형",
@@ -53,11 +57,11 @@ for key in ("qs", "es", "res"):
 # ── 1. 문항 생성 ──────────────────────────────────────────
 if st.button("AI 변형 실행 (딸깍)", type="primary"):
     if not api_key:
-        st.error("사이드바에 API Key를 입력하세요.")
+        st.error(f"사이드바에 {api_label}를 입력하세요.")
     else:
         with st.spinner("출제 중..."):
             try:
-                engine = DDalGGakEngine(api_key)
+                engine = DDalGGakEngine(api_key, ai_provider)
                 raw    = engine.generate_variants(source_text, source_image, variant_type, num_variants)
                 qs, es = engine.parse_result(raw)
 

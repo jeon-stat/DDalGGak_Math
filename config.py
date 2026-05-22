@@ -2,8 +2,15 @@
 # 전역 설정 및 상수를 이 파일 하나에서 관리합니다.
 # 모델 변경, 태그 수정 등 공통 값은 반드시 여기서만 수정하세요.
 
-# ── AI 모델 ──────────────────────────────────────────────
-MODEL_NAME = "gemini-2.5-flash"
+# ── AI 제공자 및 모델 ─────────────────────────────────────
+PROVIDER_GEMINI = "Gemini"
+PROVIDER_OPENAI = "GPT (OpenAI)"
+
+GEMINI_MODEL_NAME = "gemini-2.5-flash"
+OPENAI_MODEL_NAME = "gpt-5.5"
+
+# 기존 코드 호환용 기본 모델명
+MODEL_NAME = GEMINI_MODEL_NAME
 
 # ── 파싱용 특수 태그 ──────────────────────────────────────
 Q_TAG_START = "[QUESTION_START]"

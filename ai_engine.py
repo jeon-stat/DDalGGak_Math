@@ -1,22 +1,41 @@
 # ai_engine.py
 # 딸깍 매스 프리미엄 AI 출제 엔진
-# 역할: Gemini API 호출 및 응답 파싱만 담당합니다.
+# 역할: AI API 호출 및 응답 파싱만 담당합니다.
 # 프롬프트 내용 → prompts.py / 상수 → config.py
 
+import base64
+from io import BytesIO
 import re
 
 import google.generativeai as genai
+from openai import OpenAI
 
-from config import MODEL_NAME, Q_TAG_START, Q_TAG_END, E_TAG_START, E_TAG_END
+from config import (
+    E_TAG_END,
+    E_TAG_START,
+    GEMINI_MODEL_NAME,
+    OPENAI_MODEL_NAME,
+    PROVIDER_GEMINI,
+    PROVIDER_OPENAI,
+    Q_TAG_END,
+    Q_TAG_START,
+)
 from prompts import build_variant_prompt
 
 
 class DDalGGakEngine:
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, provider: str = PROVIDER_GEMINI):
         """딸깍 매스 AI 출제 엔진 초기화"""
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(MODEL_NAME)
+        self.provider = provider
+
+        if self.provider == PROVIDER_OPENAI:
+            self.client = OpenAI(api_key=api_key)
+            self.model = None
+        else:
+            genai.configure(api_key=api_key)
+            self.client = None
+            self.model = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
     def generate_variants(
         self,
@@ -39,6 +58,9 @@ class DDalGGakEngine:
         """
         prompt = build_variant_prompt(source_text, variant_type, num_variants)
 
+        if self.provider == PROVIDER_OPENAI:
+            return self._generate_openai(prompt, source_image)
+
         contents = []
         if source_image is not None:
             contents.append(source_image)
@@ -46,6 +68,30 @@ class DDalGGakEngine:
 
         response = self.model.generate_content(contents)
         return response.text
+
+    def _generate_openai(self, prompt: str, source_image) -> str:
+        """OpenAI Responses API로 변형 문항을 생성합니다."""
+        content = [{"type": "input_text", "text": prompt}]
+
+        if source_image is not None:
+            content.append({
+                "type": "input_image",
+                "image_url": self._image_to_data_url(source_image),
+            })
+
+        response = self.client.responses.create(
+            model=OPENAI_MODEL_NAME,
+            input=[{"role": "user", "content": content}],
+        )
+        return response.output_text
+
+    @staticmethod
+    def _image_to_data_url(source_image) -> str:
+        """PIL 이미지를 OpenAI vision 입력용 data URL로 변환합니다."""
+        image_buffer = BytesIO()
+        source_image.save(image_buffer, format="PNG")
+        encoded_image = base64.b64encode(image_buffer.getvalue()).decode("utf-8")
+        return f"data:image/png;base64,{encoded_image}"
 
     def parse_result(self, raw_result: str):
         """
