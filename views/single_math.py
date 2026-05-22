@@ -113,6 +113,39 @@ with info_col:
     st.markdown("")
     run_button = st.button("AI 변형 실행", type="primary", use_container_width=True)
 
+    st.markdown(
+        """
+        <div class="dd-section-title" style="margin-top:1.8rem;">
+            <div>
+                <h3>저장 설정</h3>
+                <p>클라우드 보관함 연동을 위한 자리입니다.</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    save_name = st.text_input(
+        "저장 이름",
+        placeholder="ex) 등차수열 절댓값 변형 01",
+        disabled=True,
+    )
+    save_folder = st.selectbox(
+        "저장 폴더",
+        ["클라우드 저장 준비중"],
+        disabled=True,
+    )
+    new_folder = st.text_input(
+        "새 폴더",
+        placeholder="ex) 수열 / 미적분 / 3월 모의고사",
+        disabled=True,
+    )
+    st.button(
+        "문제 보관함에 저장",
+        disabled=True,
+        use_container_width=True,
+    )
+    st.caption("로그인과 클라우드 저장소가 연결되면 원본과 생성 결과를 함께 저장할 수 있습니다.")
+
 if run_button:
     if not api_key:
         st.error(f"사이드바에 {api_label}를 입력하세요.")

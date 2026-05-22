@@ -19,7 +19,7 @@ pages = [
     st.Page("views/home.py",         title="Home",                           icon="🏠"),
     st.Page("views/single_math.py",  title="AI 단일 문항 변형",              icon="📐"),
     st.Page("views/full_exam.py",    title="모의고사 통째로 변형 (준비중)",  icon="⚡"),
-    st.Page("views/question_box.py", title="나만의 오답 보관함 (준비중)",    icon="🗂️"),
+    st.Page("views/question_box.py", title="나만의 문제 보관함",            icon="🗂️"),
 ]
 
 pg = st.navigation(pages)
