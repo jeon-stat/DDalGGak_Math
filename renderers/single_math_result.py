@@ -1,5 +1,3 @@
-import re
-
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -110,8 +108,6 @@ def render_explanations(explanations: list[str]) -> None:
     for idx, explanation in enumerate(explanations):
         with st.expander(f"▶ {idx + 1}번 문항 해설 보기", expanded=True):
             safe_explanation = explanation.replace("`", "$")
-            safe_explanation = re.sub(r"\.\s+", ".\n\n", safe_explanation)
-            safe_explanation = re.sub(r"\n{3,}", "\n\n", safe_explanation)
             st.markdown(safe_explanation)
 
 
